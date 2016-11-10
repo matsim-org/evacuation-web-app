@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright (c) 2016 Gregor Lämmel
+  ~ This file is part of evacuation.
+  ~ evacuation is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ See also LICENSE and WARRANTY file
+  -->
+
+<html>
+<head>
+    <title>Hello WebSocket</title>
+    <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+    <style>
+        .mySlides {
+            display: none
+        }
+
+        .w3-left, .w3-right, .w3-badge {
+            cursor: pointer
+        }
+
+        .w3-badge {
+            height: 13px;
+            width: 13px;
+            padding: 0
+        }
+    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="main.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+    <meta charset='utf-8'/>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.26.0/mapbox-gl.js'></script>
+    <link rel='stylesheet'
+          href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v1.3.1/mapbox-gl-geocoder.css'
+          type='text/css'/>
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.12.1/mapbox-gl-draw.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.26.0/mapbox-gl.css' rel='stylesheet'/>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.12.1/mapbox-gl-draw.css'
+          type='text/css'/>
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v1.3.1/mapbox-gl-geocoder.js'></script>
+    <link rel='stylesheet'
+          href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v1.3.1/mapbox-gl-geocoder.css'
+          type='text/css'/>
+
+    <!--<script src="/app.js"></script>-->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+    <style>
+
+
+        .container {
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            position: absolute;
+            /*width: 200px;*/
+            bottom: 10px;
+            margin: auto;
+            left: 10px;
+            /*padding: 10px;*/
+        }
+
+        .container {
+            background-color: #e5e5e5;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+            border-radius: 3px;
+            /*padding: 10px;*/
+            /*margin-bottom: 10px;*/
+        }
+
+        #blackOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(128, 128, 128, 0.9);
+        }
+
+    </style>
+</head>
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+
+
+<div id='map'></div>
+
+<div class="w3-display-topright" style="margin-right:8px;margin-top:8px">
+    <img src="matsim_logo_blue.png" style="widht:128px">
+</div>
+
+
+<div id="main-content" class="container">
+    <form class="form-inline">
+        <div class="form-group">
+            <!--<label for="connect">WebSocket connection:</label>-->
+            <button id="connect" class="btn btn-default" type="submit">Connect</button>
+            <button id="submit" class="btn btn-default" type="submit" disabled="disabled">Submit</button>
+            <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect
+            </button>
+            <input type="number" id="number" class="form-control" placeholder="#evacuees" disabled="disabled">
+        </div>
+    </form>
+</div>
+
+<div id="blackOverlay">
+    <div class="w3-display-middle w3-content w3-display-container intro" style="max-width:1280px;width:90%">
+
+
+        <a class="w3-btn-floating w3-ripple w3-display-topright" onclick="closeIntro(this)">X</a>
+        <a class="w3-btn-floating w3-ripple w3-display-left" onclick="plusDivs(-1)">&#10094;</a>
+        <a class="w3-btn-floating w3-ripple w3-display-right" onclick="plusDivs(1)">&#10095;</a>
+
+    <div class="w3-display-container mySlides">
+        <img src="1.png" style="width:100%">
+        <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+            1. Zoom and pan to the area of interest.
+        </div>
+    </div>
+
+    <div class="w3-display-container mySlides">
+        <img src="2.png" style="width:100%">
+        <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+            2. Select polygon tool to mark the evacuation area by clicking along the perimeter. When done, hit Enter.
+        </div>
+    </div>
+
+    <div class="w3-display-container mySlides">
+        <img src="3.png" style="width:100%">
+        <div class="w3-display-topmiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+            3. Press Connect and enter the number of evacuating vehicles.
+        </div>
+    </div>
+
+    <div class="w3-display-container mySlides">
+        <img src="4.png" style="width:100%">
+        <div class="w3-display-topmiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+            4. Press Submit.
+        </div>
+    </div>
+
+    <div class="w3-display-container mySlides">
+        <img src="5.png" style="width:100%">
+        <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+            5. Once the simulation run is completed, results will be displayed. Depending on the size of the evacuation
+            area and number of vehicles this will take some time. Don't reload the page while waiting for the results.
+        </div>
+    </div>
+
+    <div class="w3-display-container mySlides">
+        <img src="6.png" style="width:100%">
+        <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+            6. Now you can click at any location inside the evacuation area to get a suggested evacuation route with
+            expected travel time information.
+        </div>
+    </div>
+
+</div>
+</div>
+
+<script>
+
+    var slideIndex = 1;
+    showDivs(slideIndex);
+
+    function plusDivs(n) {
+        showDivs(slideIndex += n);
+    }
+
+    function showDivs(n) {
+        var i;
+        var x = document.getElementsByClassName("mySlides");
+        if (n > x.length) {
+            slideIndex = 1
+        }
+        if (n < 1) {
+            slideIndex = x.length
+        }
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
+        }
+        x[slideIndex - 1].style.display = "block";
+    }
+
+    function closeIntro(e) {
+        e.parentNode.parentNode.remove();
+        addControls();
+
+    }
+
+
+
+    function toHHMMSS(time) {
+        var sec_num = Math.round(time);//, 10); // don't forget the second param
+        var hours = Math.floor(sec_num / 3600);
+        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+        var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+        if (hours < 10) {
+            hours = "0" + hours;
+        }
+        if (minutes < 10) {
+            minutes = "0" + minutes;
+        }
+        if (seconds < 10) {
+            seconds = "0" + seconds;
+        }
+        return hours + ':' + minutes + ':' + seconds;
+    }
+
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ29ybGFlbW1lbCIsImEiOiJjaW92N3FjNzgwMDVld2RranFibGV3NjNxIn0.OqCU0VqbtWa_90fz11UArw';
+    var map = new mapboxgl.Map({
+        container: 'map', // container id
+        style: 'mapbox://styles/mapbox/streets-v10', //stylesheet location
+        center: [-73.965626, 40.782028], // starting position
+        zoom: 11 // starting zoom
+    });
+
+
+    function addControls() {
+
+
+        map.addControl(new mapboxgl.Geocoder());
+
+        draw = mapboxgl.Draw({
+            drawing: true,
+            displayControlsDefault: false,
+            controls: {
+                polygon: true,
+                trash: true
+            },
+            styles: [
+                // ACTIVE (being drawn)
+                // line stroke
+                {
+                    "id": "gl-draw-line",
+                    "type": "line",
+                    "filter": ["all", ["==", "$type", "LineString"], ["!=", "mode", "static"]],
+                    "layout": {
+                        "line-cap": "round",
+                        "line-join": "round"
+                    },
+                    "paint": {
+                        "line-color": "#FF0C0C",
+                        "line-dasharray": [0.2, 2],
+                        "line-width": 4
+                    }
+                },
+                // polygon fill
+                {
+                    "id": "gl-draw-polygon-fill",
+                    "type": "fill",
+                    "filter": ["all", ["==", "$type", "Polygon"], ["!=", "mode", "static"]],
+                    "paint": {
+                        "fill-color": "#D20C0C",
+                        "fill-outline-color": "#D20C0C",
+                        "fill-opacity": 0.1
+                    }
+                },
+                // polygon outline stroke
+                // This doesn't style the first edge of the polygon, which uses the line stroke styling instead
+                {
+                    "id": "gl-draw-polygon-stroke-active",
+                    "type": "line",
+                    "filter": ["all", ["==", "$type", "Polygon"], ["!=", "mode", "static"]],
+                    "layout": {
+                        "line-cap": "round",
+                        "line-join": "round"
+                    },
+                    "paint": {
+                        "line-color": "#D20C0C",
+                        "line-dasharray": [0.2, 2],
+                        "line-width": 4
+                    }
+                },
+                // vertex point halos
+                {
+                    "id": "gl-draw-polygon-and-line-vertex-halo-active",
+                    "type": "circle",
+                    "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
+                    "paint": {
+                        "circle-radius": 5,
+                        "circle-color": "#FFF"
+                    }
+                },
+                // vertex points
+                {
+                    "id": "gl-draw-polygon-and-line-vertex-active",
+                    "type": "circle",
+                    "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
+                    "paint": {
+                        "circle-radius": 3,
+                        "circle-color": "#D20C0C"
+                    }
+                },
+
+                // INACTIVE (static, already drawn)
+                // line stroke
+                {
+                    "id": "gl-draw-line-static",
+                    "type": "line",
+                    "filter": ["all", ["==", "$type", "LineString"], ["==", "mode", "static"]],
+                    "layout": {
+                        "line-cap": "round",
+                        "line-join": "round"
+                    },
+                    "paint": {
+                        "line-color": "#000",
+                        "line-width": 3
+                    }
+                },
+                // polygon fill
+                {
+                    "id": "gl-draw-polygon-fill-static",
+                    "type": "fill",
+                    "filter": ["all", ["==", "$type", "Polygon"], ["==", "mode", "static"]],
+                    "paint": {
+                        "fill-color": "#000",
+                        "fill-outline-color": "#000",
+                        "fill-opacity": 0.1
+                    }
+                },
+                // polygon outline
+                {
+                    "id": "gl-draw-polygon-stroke-static",
+                    "type": "line",
+                    "filter": ["all", ["==", "$type", "Polygon"], ["==", "mode", "static"]],
+                    "layout": {
+                        "line-cap": "round",
+                        "line-join": "round"
+                    },
+                    "paint": {
+                        "line-color": "#000",
+                        "line-width": 3
+                    }
+                }
+            ]
+
+        });
+
+        map.addControl(draw);
+//        map.addControl(new mapboxgl.NavigationControl());
+    }
+
+    var stompClient = null;
+
+    function setConnected(connected) {
+        $("#connect").prop("disabled", connected);
+        $("#submit").prop("disabled", !connected);
+        $("#disconnect").prop("disabled", !connected);
+        var nr = $("#number");
+        nr.prop("disabled", !connected);
+        nr.val("50000");
+
+    }
+
+    function setSubmitted(submitted) {
+        $("#connect").prop("disabled", submitted);
+        $("#submit").prop("disabled", submitted);
+        $("#disconnect").prop("disabled", !submitted);
+    }
+
+    function connect() {
+        var data = draw.getAll();
+
+        if (data.features.length <= 0) {
+            alert("Use the draw tools to draw an evacuation area!");
+        } else {
+            var socket = new SockJS('/evacuation');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                setConnected(true);
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/evacuation', function (greeting) {
+                    if (greeting != null) {
+                        showGreeting(JSON.parse(greeting.body));
+                    } else {
+                        alert("Could not run evacuation simulation, please select smaller area and try again!");
+                    }
+                });
+                stompClient.subscribe('/topic/routing', function (route) {
+                    if (route != null) {
+                        showRoute(JSON.parse(route.body));
+                    } else {
+                        alert("Could not find evacuation route for given origin, please choose a different one!");
+                    }
+
+                })
+            });
+    }
+    }
+
+    function disconnect() {
+
+
+        if (stompClient != null) {
+            stompClient.disconnect();
+    }
+
+        map.removeSource('hexgrid');
+        map.removeLayer('hexgrid');
+
+        setConnected(false);
+
+    }
+
+    function submit() {
+        var data = draw.getAll();
+        var coords = data.features;//[0].geometry.coordinates
+        coords[0].properties["num"] = $("#number").val();
+        stompClient.send("/app/evac", {}, JSON.stringify(coords));
+        setSubmitted(true);
+    }
+
+    function showRoute(route) {
+
+        try {
+            map.removeSource("route");
+            map.removeLayer("route");
+            map.removeSource("tt");
+            map.removeLayer("tt");
+    }
+        catch (err) {
+            //        alert("Error!");
+    }
+        map.addSource("route", {
+            type: 'geojson',
+            data: route
+        });
+        map.addLayer({
+            'id': 'route',
+            'type': 'line',
+            'source': 'route',
+            "layout": {
+                "line-join": "round",
+                "line-cap": "round"
+            },
+            "paint": {
+                "line-color": "#000",
+                "line-width": 4
+            }
+        }, 'start');
+
+        var time = route.features[0].properties["time"];
+        var coords = route.features[route.features.length - 1].geometry.coordinates;
+        var m = coords[coords.length - 1];
+        map.addSource("tt", {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [m[0], m[1]]
+                    },
+                    "properties": {
+                        "title": "Arrive in " + toHHMMSS(time),
+                        "icon": "marker"
+                    }
+                }]
+            }
+        });
+        map.addLayer({
+            "id": "tt",
+            "type": "symbol",
+            "source": "tt",
+            "layout": {
+                "icon-image": "{icon}-15",
+                "text-field": "{title}",
+                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                "text-offset": [0, -0.6],
+                "text-anchor": "bottom"
+            },
+            "paint": {
+                "text-color": "#000",
+                "text-halo-color": "#fff",
+                "text-halo-width": 1,
+                "text-halo-blur": 3
+            }
+        });
+
+
+    }
+
+    function showGreeting(message) {
+        map.addSource("hexgrid", {
+            type: 'geojson',
+            data: message
+        });
+        map.addLayer({
+            'id': 'hexgrid',
+            'type': 'fill',
+            'source': 'hexgrid',
+            'layout': {},
+            'paint': {
+                //                'fill-color': '#088',
+                'fill-opacity': 0.8,
+
+                'fill-color': {
+                    property: 'color',
+                    type: 'categorical',
+                    stops: [
+                        ['green', '#008000'],
+                        ['lime', '#00ff00'],
+                        ['yellow', '#ffff00'],
+                        ['orange', '#ffa500'],
+                        ['red', '#ff0000'],
+                        ['fuchsia', '#ff00ff'],
+                        ['purple', '#800080'],
+                        ['white', '#ffffff']]
+                }
+            }
+        }, 'aeroway');
+        routing = true;
+        map.on('click', function (e) {
+
+        try {
+            map.removeSource("start");
+            map.removeLayer("start");
+        }
+        catch (err) {
+            //        alert("Error!");
+        }
+            map.addSource("start", {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [e.lngLat.lng, e.lngLat.lat]
+                    },
+                    "properties": {
+                        "title": "Depart now",
+                        "icon": "marker"
+                    }
+                }]
+            }
+        });
+        map.addLayer({
+            "id": "start",
+            "type": "symbol",
+            "source": "start",
+            "layout": {
+                "icon-image": "{icon}-15",
+                //                "icon-color": "#ff1177",
+                "text-field": "{title}",
+                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                "text-offset": [0, 0.6],
+                "text-anchor": "top"
+            },
+            "paint": {
+                "text-color": "#000",
+                "text-halo-color": "#fff",
+                "text-halo-width": 1,
+                "text-halo-blur": 3
+            }
+        });
+
+//            var json = {"type":""};
+            var str = JSON.stringify(e.lngLat);
+            stompClient.send("/app/route", {}, str);
+
+    });
+    }
+
+    $(function () {
+        $("form").on('submit', function (e) {
+            e.preventDefault();
+        });
+        $("#connect").click(function () {
+            connect();
+        });
+        $("#disconnect").click(function () {
+            disconnect();
+        });
+        $("#submit").click(function () {
+            submit();
+        });
+    });
+</script>
+</body>
+</html>
