@@ -43,6 +43,10 @@
             <id>matsim</id>
             <url>http://dl.bintray.com/matsim/matsim</url>
         </repository>
+        <repository>
+            <id>ojo-snapshots</id>
+            <url>http://oss.jfrog.org/libs-snapshot</url>
+        </repository>
     </repositories>
 
     <dependencies>
