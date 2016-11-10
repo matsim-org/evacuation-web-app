@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2016 Gregor Lämmel
- * This file is part of evacuation.
- * evacuation is free software: you can redistribute it and/or modify
+ * This file is part of evacuation-web-app.
+ * evacuation-web-app is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -16,10 +16,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.log4j.Logger;
-import org.matsim.contrib.evacuationwebapp.manager.EvacuationManager;
-import org.matsim.contrib.evacuationwebapp.manager.LngLat;
 import org.geojson.Feature;
 import org.geojson.FeatureCollection;
+import org.matsim.contrib.evacuationwebapp.manager.EvacuationManager;
+import org.matsim.contrib.evacuationwebapp.manager.LngLat;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;

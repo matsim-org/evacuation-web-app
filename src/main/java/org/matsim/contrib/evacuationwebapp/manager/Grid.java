@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2016 Gregor Lämmel
- * This file is part of evacuation.
- * evacuation is free software: you can redistribute it and/or modify
+ * This file is part of evacuation-web-app.
+ * evacuation-web-app is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -15,11 +15,11 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Polygon;
 import org.apache.log4j.Logger;
-import org.matsim.contrib.evacuationwebapp.utils.Geometries;
 import org.codetome.hexameter.core.api.Hexagon;
 import org.codetome.hexameter.core.api.HexagonalGrid;
 import org.codetome.hexameter.core.api.HexagonalGridBuilder;
 import org.codetome.hexameter.core.api.Point;
+import org.matsim.contrib.evacuationwebapp.utils.Geometries;
 import org.matsim.core.utils.collections.QuadTree;
 import rx.Observable;
 import rx.functions.Action1;

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2016 Gregor Lämmel
- * This file is part of evacuation.
- * evacuation is free software: you can redistribute it and/or modify
+ * This file is part of evacuation-web-app.
+ * evacuation-web-app is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -17,12 +17,12 @@ import de.westnordost.osmapi.map.data.LatLon;
 import de.westnordost.osmapi.map.data.Node;
 import de.westnordost.osmapi.map.data.Way;
 import org.apache.log4j.Logger;
-import org.matsim.contrib.evacuationwebapp.utils.Transformer;
 import org.geojson.LngLatAlt;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.evacuationwebapp.utils.Transformer;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordUtils;
 
