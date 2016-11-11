@@ -5,8 +5,8 @@ While the evacuation scenario is defined on an interactive map in your web brows
 the actual simulation run's on a (local instantiated) server (backend).
 
 #Prerequisites
-Java >= 1.8
-Maven
+Java >= 1.8; 
+Maven; 
 A firewall configuration that let you open server port 8080 (for local connections)
 
 #Installation
