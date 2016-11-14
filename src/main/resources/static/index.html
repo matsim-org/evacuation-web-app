@@ -37,18 +37,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
     <meta charset='utf-8'/>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.26.0/mapbox-gl.js'></script>
-    <link rel='stylesheet'
-          href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v1.3.1/mapbox-gl-geocoder.css'
-          type='text/css'/>
-    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.12.1/mapbox-gl-draw.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.26.0/mapbox-gl.css' rel='stylesheet'/>
-    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.12.1/mapbox-gl-draw.css'
-          type='text/css'/>
-    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v1.3.1/mapbox-gl-geocoder.js'></script>
-    <link rel='stylesheet'
-          href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v1.3.1/mapbox-gl-geocoder.css'
-          type='text/css'/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+
+    <link rel="stylesheet" href="/leaflet/leaflet.draw.css"/>
+    <script src="leaflet/leaflet.draw.js"></script>
 
     <!--<script src="/app.js"></script>-->
     <style>
@@ -62,6 +55,7 @@
             top: 0;
             bottom: 0;
             width: 100%;
+            z-index: 1;
         }
     </style>
     <style>
@@ -74,6 +68,7 @@
             bottom: 10px;
             margin: auto;
             left: 10px;
+            z-index: 98;
             /*padding: 10px;*/
         }
 
@@ -92,6 +87,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(128, 128, 128, 0.9);
+            z-index: 99;
         }
 
     </style>
@@ -104,9 +100,10 @@
 
 <div id='map'></div>
 
-<div class="w3-display-topright" style="margin-right:8px;margin-top:8px">
+<div class="w3-display-topright" style="margin-right:8px;margin-top:8px;z-index: 98">
     <img src="matsim_logo_blue.png" style="widht:128px">
 </div>
+
 
 
 <div id="main-content" class="container">
@@ -177,6 +174,7 @@
 </div>
 </div>
 
+
 <script>
 
     var slideIndex = 1;
@@ -228,139 +226,80 @@
     }
 
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ29ybGFlbW1lbCIsImEiOiJjaW92N3FjNzgwMDVld2RranFibGV3NjNxIn0.OqCU0VqbtWa_90fz11UArw';
-    var map = new mapboxgl.Map({
-        container: 'map', // container id
-        style: 'mapbox://styles/mapbox/streets-v10', //stylesheet location
-        center: [-73.965626, 40.782028], // starting position
-        zoom: 11 // starting zoom
+    var map = L.map('map').setView([40.782028, -73.965626], 18);
+
+    //    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    //        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    //    }).addTo(map);
+
+    var Stamen_Toner = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.{ext}', {
+        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        subdomains: 'abcd',
+        minZoom: 0,
+        maxZoom: 20,
+        ext: 'png'
     });
+    Stamen_Toner.addTo(map);
+
+    //    // Initialize the FeatureGroup to store editable layers
+    //    var drawnItems = new L.FeatureGroup();
+    //    map.addLayer(drawnItems);
+    //    var Stamen_Toner = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.{ext}', {
+    //    	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    //    	subdomains: 'abcd',
+    //    	minZoom: 0,
+    //    	maxZoom: 20,
+    //    	ext: 'png'
+    //    });
+    //    Stamen_Toner.addTo(map);
+
+    // Initialize the FeatureGroup to store editable layers
+    var drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
 
 
     function addControls() {
 
 
-        map.addControl(new mapboxgl.Geocoder());
-
-        draw = mapboxgl.Draw({
-            drawing: true,
-            displayControlsDefault: false,
-            controls: {
-                polygon: true,
-                trash: true
+        var options = {
+            position: 'topleft',
+            draw: {
+                polyline: false,
+                polygon: {
+                    allowIntersection: false, // Restricts shapes to simple polygons
+                    drawError: {
+                        color: '#e1e100', // Color the shape will turn when intersects
+                        message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+                    },
+                    shapeOptions: {
+                        color: '#ff1111'
+                    }
+                },
+                circle: false, // Turns off this drawing tool
+                rectangle: false,
+                marker: false
             },
-            styles: [
-                // ACTIVE (being drawn)
-                // line stroke
-                {
-                    "id": "gl-draw-line",
-                    "type": "line",
-                    "filter": ["all", ["==", "$type", "LineString"], ["!=", "mode", "static"]],
-                    "layout": {
-                        "line-cap": "round",
-                        "line-join": "round"
-                    },
-                    "paint": {
-                        "line-color": "#FF0C0C",
-                        "line-dasharray": [0.2, 2],
-                        "line-width": 4
-                    }
-                },
-                // polygon fill
-                {
-                    "id": "gl-draw-polygon-fill",
-                    "type": "fill",
-                    "filter": ["all", ["==", "$type", "Polygon"], ["!=", "mode", "static"]],
-                    "paint": {
-                        "fill-color": "#D20C0C",
-                        "fill-outline-color": "#D20C0C",
-                        "fill-opacity": 0.1
-                    }
-                },
-                // polygon outline stroke
-                // This doesn't style the first edge of the polygon, which uses the line stroke styling instead
-                {
-                    "id": "gl-draw-polygon-stroke-active",
-                    "type": "line",
-                    "filter": ["all", ["==", "$type", "Polygon"], ["!=", "mode", "static"]],
-                    "layout": {
-                        "line-cap": "round",
-                        "line-join": "round"
-                    },
-                    "paint": {
-                        "line-color": "#D20C0C",
-                        "line-dasharray": [0.2, 2],
-                        "line-width": 4
-                    }
-                },
-                // vertex point halos
-                {
-                    "id": "gl-draw-polygon-and-line-vertex-halo-active",
-                    "type": "circle",
-                    "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
-                    "paint": {
-                        "circle-radius": 5,
-                        "circle-color": "#FFF"
-                    }
-                },
-                // vertex points
-                {
-                    "id": "gl-draw-polygon-and-line-vertex-active",
-                    "type": "circle",
-                    "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
-                    "paint": {
-                        "circle-radius": 3,
-                        "circle-color": "#D20C0C"
-                    }
-                },
+            edit: {
+                featureGroup: drawnItems, //REQUIRED!!
+                remove: true
+            }
+        };
 
-                // INACTIVE (static, already drawn)
-                // line stroke
-                {
-                    "id": "gl-draw-line-static",
-                    "type": "line",
-                    "filter": ["all", ["==", "$type", "LineString"], ["==", "mode", "static"]],
-                    "layout": {
-                        "line-cap": "round",
-                        "line-join": "round"
-                    },
-                    "paint": {
-                        "line-color": "#000",
-                        "line-width": 3
-                    }
-                },
-                // polygon fill
-                {
-                    "id": "gl-draw-polygon-fill-static",
-                    "type": "fill",
-                    "filter": ["all", ["==", "$type", "Polygon"], ["==", "mode", "static"]],
-                    "paint": {
-                        "fill-color": "#000",
-                        "fill-outline-color": "#000",
-                        "fill-opacity": 0.1
-                    }
-                },
-                // polygon outline
-                {
-                    "id": "gl-draw-polygon-stroke-static",
-                    "type": "line",
-                    "filter": ["all", ["==", "$type", "Polygon"], ["==", "mode", "static"]],
-                    "layout": {
-                        "line-cap": "round",
-                        "line-join": "round"
-                    },
-                    "paint": {
-                        "line-color": "#000",
-                        "line-width": 3
-                    }
-                }
-            ]
-
-        });
-
-        map.addControl(draw);
+        // Initialize the draw control and pass it the FeatureGroup of editable layers
+        var drawControl = new L.Control.Draw(options);
+        map.addControl(drawControl);
 //        map.addControl(new mapboxgl.NavigationControl());
     }
+
+    map.on(L.Draw.Event.CREATED, function (e) {
+        var type = e.layerType;
+        layer = e.layer;
+        if (type === 'marker') {
+            // Do marker specific actions
+        }
+        // Do whatever else you need to. (save to db; add to map etc)
+        drawnItems.addLayer(layer);
+    });
 
     var stompClient = null;
 
@@ -381,9 +320,9 @@
     }
 
     function connect() {
-        var data = draw.getAll();
+        var data = drawnItems.getLayers();
 
-        if (data.features.length <= 0) {
+        if (data.length <= 0) {
             alert("Use the draw tools to draw an evacuation area!");
         } else {
             var socket = new SockJS('/evacuation');
@@ -425,10 +364,9 @@
     }
 
     function submit() {
-        var data = draw.getAll();
-        var coords = data.features;//[0].geometry.coordinates
-        coords[0].properties["num"] = $("#number").val();
-        stompClient.send("/app/evac", {}, JSON.stringify(coords));
+        var data = drawnItems.getLayers()[0].toGeoJSON();
+        data.properties["num"] = $("#number").val();
+        stompClient.send("/app/evac", {}, JSON.stringify([data]));
         setSubmitted(true);
     }
 
@@ -503,87 +441,115 @@
 
     }
 
+
+    function style(feature) {
+        return {
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7,
+            fillColor: feature.properties.color
+        };
+    }
+
+
+    function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+            click: zoomToFeature
+        });
+    }
+
+    function resetHighlight(e) {
+        geojson.resetStyle(e.target);
+//   		info.update();
+    }
+
+    function zoomToFeature(e) {
+        map.fitBounds(e.target.getBounds());
+    }
+    function highlightFeature(e) {
+        var layer = e.target;
+
+        layer.setStyle({
+            weight: 5,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
+        }
+
+//    		info.update(layer.feature.properties);
+    }
+
     function showGreeting(message) {
-        map.addSource("hexgrid", {
-            type: 'geojson',
-            data: message
-        });
-        map.addLayer({
-            'id': 'hexgrid',
-            'type': 'fill',
-            'source': 'hexgrid',
-            'layout': {},
-            'paint': {
-                //                'fill-color': '#088',
-                'fill-opacity': 0.8,
 
-                'fill-color': {
-                    property: 'color',
-                    type: 'categorical',
-                    stops: [
-                        ['green', '#008000'],
-                        ['lime', '#00ff00'],
-                        ['yellow', '#ffff00'],
-                        ['orange', '#ffa500'],
-                        ['red', '#ff0000'],
-                        ['fuchsia', '#ff00ff'],
-                        ['purple', '#800080'],
-                        ['white', '#ffffff']]
-                }
-            }
-        }, 'aeroway');
-        routing = true;
-        map.on('click', function (e) {
+        geojson = L.geoJson(message, {
+            style: style,
+            onEachFeature: onEachFeature
+        }).addTo(map);
 
-        try {
-            map.removeSource("start");
-            map.removeLayer("start");
-        }
-        catch (err) {
-            //        alert("Error!");
-        }
-            map.addSource("start", {
-            "type": "geojson",
-            "data": {
-                "type": "FeatureCollection",
-                "features": [{
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [e.lngLat.lng, e.lngLat.lat]
-                    },
-                    "properties": {
-                        "title": "Depart now",
-                        "icon": "marker"
-                    }
-                }]
-            }
-        });
-        map.addLayer({
-            "id": "start",
-            "type": "symbol",
-            "source": "start",
-            "layout": {
-                "icon-image": "{icon}-15",
-                //                "icon-color": "#ff1177",
-                "text-field": "{title}",
-                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-                "text-offset": [0, 0.6],
-                "text-anchor": "top"
-            },
-            "paint": {
-                "text-color": "#000",
-                "text-halo-color": "#fff",
-                "text-halo-width": 1,
-                "text-halo-blur": 3
-            }
-        });
+//        geojson = L.geoJson(message, {
+//            style: style(feature)
+//        }).addTo(map);
 
-//            var json = {"type":""};
-            var str = JSON.stringify(e.lngLat);
-            stompClient.send("/app/route", {}, str);
-
-    });
+//        routing = true;
+//        map.on('click', function (e) {
+//
+//        try {
+//            map.removeSource("start");
+//            map.removeLayer("start");
+//        }
+//        catch (err) {
+//            //        alert("Error!");
+//        }
+//            map.addSource("start", {
+//            "type": "geojson",
+//            "data": {
+//                "type": "FeatureCollection",
+//                "features": [{
+//                    "type": "Feature",
+//                    "geometry": {
+//                        "type": "Point",
+//                        "coordinates": [e.lngLat.lng, e.lngLat.lat]
+//                    },
+//                    "properties": {
+//                        "title": "Depart now",
+//                        "icon": "marker"
+//                    }
+//                }]
+//            }
+//        });
+//        map.addLayer({
+//            "id": "start",
+//            "type": "symbol",
+//            "source": "start",
+//            "layout": {
+//                "icon-image": "{icon}-15",
+//                //                "icon-color": "#ff1177",
+//                "text-field": "{title}",
+//                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+//                "text-offset": [0, 0.6],
+//                "text-anchor": "top"
+//            },
+//            "paint": {
+//                "text-color": "#000",
+//                "text-halo-color": "#fff",
+//                "text-halo-width": 1,
+//                "text-halo-blur": 3
+//            }
+//        });
+//
+////            var json = {"type":""};
+//            var str = JSON.stringify(e.lngLat);
+//            stompClient.send("/app/route", {}, str);
+//
+//    });
     }
 
     $(function () {
