@@ -81,6 +81,7 @@ public class EvacuationTimeObserver implements PersonDepartureEventHandler, Pers
             }
 
         }
+
         for (Map.Entry<Grid.Cell, TTInfo> entry : es) {
             double rel = entry.getValue().tt / maxTT;
             if (rel < 0.3) {
@@ -98,6 +99,7 @@ public class EvacuationTimeObserver implements PersonDepartureEventHandler, Pers
             } else {
                 entry.getKey().c = Grid.CellColor.purple;
             }
+            entry.getKey().time = entry.getValue().tt;
         }
     }
 

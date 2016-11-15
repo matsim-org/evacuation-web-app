@@ -159,7 +159,7 @@ public class EvacuationManager {
             GeoJsonObject geo = new Polygon(l);
             ret.setGeometry(geo);
             ret.setProperty("color", cell.c.toString());
-
+            ret.setProperty("time", cell.time);
             this.grid.add(ret);
         }
 

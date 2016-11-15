@@ -91,6 +91,21 @@
             z-index: 99;
         }
 
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            /*background: rgba(255,255,255,0.8);*/
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            z-index: 99;
+        }
+
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+
     </style>
 </head>
 <body>
@@ -101,9 +116,9 @@
 
 <div id='map'></div>
 
-<div class="w3-display-topright" style="margin-right:8px;margin-top:8px;z-index: 98">
-    <img src="matsim_logo_blue.png" style="widht:128px">
-</div>
+<!--<div class="w3-display-topright" style="margin-right:8px;margin-top:8px;z-index: 98">-->
+<!--<img src="matsim_logo_blue.png" style="widht:128px">-->
+<!--</div>-->
 
 
 <div id="main-content" class="container">
@@ -184,6 +199,7 @@
     var stopMarker;
     var startMarker;
     var routingHandler;
+    var info;
 
     var slideIndex = 1;
     showDivs(slideIndex);
@@ -235,18 +251,19 @@
 
     var map = L.map('map').setView([40.782028, -73.965626], 18);
 
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+    //    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    //        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    //    }).addTo(map);
 
-    //    var Stamen_Toner = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.{ext}', {
-    //        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    //        subdomains: 'abcd',
-    //        minZoom: 0,
-    //        maxZoom: 20,
-    //        ext: 'png'
-    //    });
-    //    Stamen_Toner.addTo(map);
+    var Stamen_Toner = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.{ext}', {
+        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; ' +
+        'Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &mdash; Simulation powered by <a href="http://matsim.org">MATSim</a>',
+        subdomains: 'abcd',
+        minZoom: 0,
+        maxZoom: 20,
+        ext: 'png'
+    });
+    Stamen_Toner.addTo(map);
 
     var drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
@@ -256,6 +273,7 @@
 
     var routeLayer = new L.FeatureGroup();
     map.addLayer(routeLayer);
+
 
     function addControls() {
 
@@ -359,7 +377,7 @@
         routeLayer.removeLayer(stopMarker);
         routeLayer.removeLayer(routeFeature);
         hexGridLayer.removeLayer(hexGridFeatures);
-        map.onRemove(routingHandler);
+        map.off('click');
         setConnected(false);
 
     }
@@ -437,7 +455,7 @@
             fillOpacity: 0.9
         });
 
-//   		info.update();
+        info.update();
     }
 
     //    function zoomToFeature(e) {
@@ -458,7 +476,7 @@
             routeLayer.bringToFront();
         }
 
-//    		info.update(layer.feature.properties);
+        info.update(layer.feature.properties.time);
     }
 
 
@@ -479,6 +497,19 @@
             var str = JSON.stringify(e.latlng);
             stompClient.send("/app/route", {}, str);
         });
+
+        info = L.control();
+        info.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+        info.update = function (time) {
+            this._div.innerHTML = '<h4>Average evacuation time per cell</h4>' + (time ?
+                    '<b>' + toHHMMSS(time) + ' [HH:MM:SS]</b>'
+                            : 'Hover over a cell');
+        };
+        info.addTo(map);
 
 
     }

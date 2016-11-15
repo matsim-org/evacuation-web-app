@@ -116,5 +116,6 @@ public class Grid {
     static final class Cell {
         Polygon p;
         CellColor c = CellColor.white;
+        double time = 0;
     }
 }

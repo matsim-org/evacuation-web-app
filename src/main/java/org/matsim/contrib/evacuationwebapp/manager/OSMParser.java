@@ -35,7 +35,7 @@ public class OSMParser {
     public void run() {
         OAuthConsumer auth = new DefaultOAuthConsumer("null", "null");
         OsmConnection osm = new OsmConnection("http://overpass-api.de/api/",
-                "my user agent", auth);
+                "agent Smith", auth);
 //        OsmConnection osm = new OsmConnection("https://api.openstreetmap.org/api/0.6/",
 //                                      "my user agent", auth);
         MapDataDao mapDao = new MapDataDao(osm);
