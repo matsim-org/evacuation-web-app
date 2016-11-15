@@ -41,6 +41,7 @@
     <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
 
     <link rel="stylesheet" href="/leaflet/leaflet.draw.css"/>
+    <!--<link rel="stylesheet" href="evacuation/static/leaflet/leaflet.draw.css"/>-->
     <script src="leaflet/leaflet.draw.js"></script>
 
     <!--<script src="/app.js"></script>-->
@@ -105,7 +106,6 @@
 </div>
 
 
-
 <div id="main-content" class="container">
     <form class="form-inline">
         <div class="form-group">
@@ -127,55 +127,63 @@
         <a class="w3-btn-floating w3-ripple w3-display-left" onclick="plusDivs(-1)">&#10094;</a>
         <a class="w3-btn-floating w3-ripple w3-display-right" onclick="plusDivs(1)">&#10095;</a>
 
-    <div class="w3-display-container mySlides">
-        <img src="1.png" style="width:100%">
-        <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
-            1. Zoom and pan to the area of interest.
+        <div class="w3-display-container mySlides">
+            <img src="1.png" style="width:100%">
+            <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+                1. Zoom and pan to the area of interest.
+            </div>
         </div>
-    </div>
 
-    <div class="w3-display-container mySlides">
-        <img src="2.png" style="width:100%">
-        <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
-            2. Select polygon tool to mark the evacuation area by clicking along the perimeter. When done, hit Enter.
+        <div class="w3-display-container mySlides">
+            <img src="2.png" style="width:100%">
+            <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+                2. Select polygon tool to mark the evacuation area by clicking along the perimeter. When done, hit
+                Enter.
+            </div>
         </div>
-    </div>
 
-    <div class="w3-display-container mySlides">
-        <img src="3.png" style="width:100%">
-        <div class="w3-display-topmiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
-            3. Press Connect and enter the number of evacuating vehicles.
+        <div class="w3-display-container mySlides">
+            <img src="3.png" style="width:100%">
+            <div class="w3-display-topmiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+                3. Press Connect and enter the number of evacuating vehicles.
+            </div>
         </div>
-    </div>
 
-    <div class="w3-display-container mySlides">
-        <img src="4.png" style="width:100%">
-        <div class="w3-display-topmiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
-            4. Press Submit.
+        <div class="w3-display-container mySlides">
+            <img src="4.png" style="width:100%">
+            <div class="w3-display-topmiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+                4. Press Submit.
+            </div>
         </div>
-    </div>
 
-    <div class="w3-display-container mySlides">
-        <img src="5.png" style="width:100%">
-        <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
-            5. Once the simulation run is completed, results will be displayed. Depending on the size of the evacuation
-            area and number of vehicles this will take some time. Don't reload the page while waiting for the results.
+        <div class="w3-display-container mySlides">
+            <img src="5.png" style="width:100%">
+            <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+                5. Once the simulation run is completed, results will be displayed. Depending on the size of the
+                evacuation
+                area and number of vehicles this will take some time. Don't reload the page while waiting for the
+                results.
+            </div>
         </div>
-    </div>
 
-    <div class="w3-display-container mySlides">
-        <img src="6.png" style="width:100%">
-        <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
-            6. Now you can click at any location inside the evacuation area to get a suggested evacuation route with
-            expected travel time information.
+        <div class="w3-display-container mySlides">
+            <img src="6.png" style="width:100%">
+            <div class="w3-display-bottommiddle w3-container w3-padding-16 w3-black w3-round w3-margin">
+                6. Now you can click at any location inside the evacuation area to get a suggested evacuation route with
+                expected travel time information.
+            </div>
         </div>
-    </div>
 
-</div>
+    </div>
 </div>
 
 
 <script>
+
+    var hexGridFeatures;
+    var stopMarker;
+    var startMarker;
+    var routingHandler;
 
     var slideIndex = 1;
     showDivs(slideIndex);
@@ -206,7 +214,6 @@
     }
 
 
-
     function toHHMMSS(time) {
         var sec_num = Math.round(time);//, 10); // don't forget the second param
         var hours = Math.floor(sec_num / 3600);
@@ -228,35 +235,27 @@
 
     var map = L.map('map').setView([40.782028, -73.965626], 18);
 
-    //    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-    //        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-    //    }).addTo(map);
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
 
-    var Stamen_Toner = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.{ext}', {
-        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        subdomains: 'abcd',
-        minZoom: 0,
-        maxZoom: 20,
-        ext: 'png'
-    });
-    Stamen_Toner.addTo(map);
-
-    //    // Initialize the FeatureGroup to store editable layers
-    //    var drawnItems = new L.FeatureGroup();
-    //    map.addLayer(drawnItems);
     //    var Stamen_Toner = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.{ext}', {
-    //    	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    //    	subdomains: 'abcd',
-    //    	minZoom: 0,
-    //    	maxZoom: 20,
-    //    	ext: 'png'
+    //        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    //        subdomains: 'abcd',
+    //        minZoom: 0,
+    //        maxZoom: 20,
+    //        ext: 'png'
     //    });
     //    Stamen_Toner.addTo(map);
 
-    // Initialize the FeatureGroup to store editable layers
     var drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
 
+    var hexGridLayer = new L.FeatureGroup();
+    map.addLayer(hexGridLayer);
+
+    var routeLayer = new L.FeatureGroup();
+    map.addLayer(routeLayer);
 
     function addControls() {
 
@@ -269,7 +268,7 @@
                     allowIntersection: false, // Restricts shapes to simple polygons
                     drawError: {
                         color: '#e1e100', // Color the shape will turn when intersects
-                        message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+                        message: '<strong>Warning!<strong> Evacuation area must not intersect itself!' // Message that will show when intersect
                     },
                     shapeOptions: {
                         color: '#ff1111'
@@ -288,7 +287,6 @@
         // Initialize the draw control and pass it the FeatureGroup of editable layers
         var drawControl = new L.Control.Draw(options);
         map.addControl(drawControl);
-//        map.addControl(new mapboxgl.NavigationControl());
     }
 
     map.on(L.Draw.Event.CREATED, function (e) {
@@ -332,7 +330,7 @@
                 console.log('Connected: ' + frame);
                 stompClient.subscribe('/topic/evacuation', function (greeting) {
                     if (greeting != null) {
-                        showGreeting(JSON.parse(greeting.body));
+                        showGrid(JSON.parse(greeting.body));
                     } else {
                         alert("Could not run evacuation simulation, please select smaller area and try again!");
                     }
@@ -346,7 +344,7 @@
 
                 })
             });
-    }
+        }
     }
 
     function disconnect() {
@@ -354,11 +352,14 @@
 
         if (stompClient != null) {
             stompClient.disconnect();
-    }
+        }
 
-        map.removeSource('hexgrid');
-        map.removeLayer('hexgrid');
 
+        routeLayer.removeLayer(startMarker);
+        routeLayer.removeLayer(stopMarker);
+        routeLayer.removeLayer(routeFeature);
+        hexGridLayer.removeLayer(hexGridFeatures);
+        map.onRemove(routingHandler);
         setConnected(false);
 
     }
@@ -370,85 +371,49 @@
         setSubmitted(true);
     }
 
+    var routeFeature;
+
     function showRoute(route) {
 
-        try {
-            map.removeSource("route");
-            map.removeLayer("route");
-            map.removeSource("tt");
-            map.removeLayer("tt");
-    }
-        catch (err) {
-            //        alert("Error!");
-    }
-        map.addSource("route", {
-            type: 'geojson',
-            data: route
-        });
-        map.addLayer({
-            'id': 'route',
-            'type': 'line',
-            'source': 'route',
-            "layout": {
-                "line-join": "round",
-                "line-cap": "round"
-            },
-            "paint": {
-                "line-color": "#000",
-                "line-width": 4
-            }
-        }, 'start');
+        var coords = route.features[0].geometry.coordinates[0];
+        var latLng = new L.LatLng(coords[1], coords[0]);
+        startMarker.setLatLng(latLng);
 
-        var time = route.features[0].properties["time"];
-        var coords = route.features[route.features.length - 1].geometry.coordinates;
-        var m = coords[coords.length - 1];
-        map.addSource("tt", {
-            "type": "geojson",
-            "data": {
-                "type": "FeatureCollection",
-                "features": [{
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [m[0], m[1]]
-                    },
-                    "properties": {
-                        "title": "Arrive in " + toHHMMSS(time),
-                        "icon": "marker"
-                    }
-                }]
-            }
-        });
-        map.addLayer({
-            "id": "tt",
-            "type": "symbol",
-            "source": "tt",
-            "layout": {
-                "icon-image": "{icon}-15",
-                "text-field": "{title}",
-                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-                "text-offset": [0, -0.6],
-                "text-anchor": "bottom"
-            },
-            "paint": {
-                "text-color": "#000",
-                "text-halo-color": "#fff",
-                "text-halo-width": 1,
-                "text-halo-blur": 3
-            }
-        });
+        routeFeature = L.geoJson(route, {
+            style: styleRoute
+        }).addTo(routeLayer);
 
+        var ft = route.features[route.features.length - 1]
+        var coords1 = ft.geometry.coordinates[ft.geometry.coordinates.length - 1];
+
+        var latLng1 = new L.LatLng(coords1[1], coords1[0]);
+        stopMarker = L.marker(latLng1).addTo(routeLayer);
+
+        stopMarker.bindTooltip("... arrive in " + toHHMMSS(route.features[0].properties.time) + ".", {
+            permanent: true,
+            offset: [0, 0]
+        });
 
     }
 
+    function styleRoute(feature) {
+        return {
+            weight: 3,
+            opacity: 1,
+            color: 'black',
+            dashArray: '3'
 
-    function style(feature) {
+        };
+    }
+
+
+    function styleGrid(feature) {
         return {
             weight: 2,
             opacity: 1,
             color: 'white',
             dashArray: '3',
-            fillOpacity: 0.7,
+            fillOpacity: 0.9,
             fillColor: feature.properties.color
         };
     }
@@ -458,98 +423,64 @@
         layer.on({
             mouseover: highlightFeature,
             mouseout: resetHighlight,
-            click: zoomToFeature
+//            click: zoomToFeature
         });
     }
 
     function resetHighlight(e) {
-        geojson.resetStyle(e.target);
+//        geojson.resetStyle(e.target);
+        var layer = e.target;
+        layer.setStyle({
+            weight: 2,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.9
+        });
+
 //   		info.update();
     }
 
-    function zoomToFeature(e) {
-        map.fitBounds(e.target.getBounds());
-    }
+    //    function zoomToFeature(e) {
+    //        map.fitBounds(e.target.getBounds());
+    //    }
     function highlightFeature(e) {
         var layer = e.target;
 
         layer.setStyle({
             weight: 5,
-            color: '#666',
-            dashArray: '',
-            fillOpacity: 0.7
+            color: '#000',
+            dashArray: '3',
+            fillOpacity: 0.9
         });
 
         if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
             layer.bringToFront();
+            routeLayer.bringToFront();
         }
 
 //    		info.update(layer.feature.properties);
     }
 
-    function showGreeting(message) {
 
-        geojson = L.geoJson(message, {
-            style: style,
+    function showGrid(message) {
+
+        hexGridFeatures = L.geoJson(message, {
+            style: styleGrid,
             onEachFeature: onEachFeature
-        }).addTo(map);
+        }).addTo(hexGridLayer);
 
-//        geojson = L.geoJson(message, {
-//            style: style(feature)
-//        }).addTo(map);
+        routingHandler = map.on('click', function (e) {
 
-//        routing = true;
-//        map.on('click', function (e) {
-//
-//        try {
-//            map.removeSource("start");
-//            map.removeLayer("start");
-//        }
-//        catch (err) {
-//            //        alert("Error!");
-//        }
-//            map.addSource("start", {
-//            "type": "geojson",
-//            "data": {
-//                "type": "FeatureCollection",
-//                "features": [{
-//                    "type": "Feature",
-//                    "geometry": {
-//                        "type": "Point",
-//                        "coordinates": [e.lngLat.lng, e.lngLat.lat]
-//                    },
-//                    "properties": {
-//                        "title": "Depart now",
-//                        "icon": "marker"
-//                    }
-//                }]
-//            }
-//        });
-//        map.addLayer({
-//            "id": "start",
-//            "type": "symbol",
-//            "source": "start",
-//            "layout": {
-//                "icon-image": "{icon}-15",
-//                //                "icon-color": "#ff1177",
-//                "text-field": "{title}",
-//                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-//                "text-offset": [0, 0.6],
-//                "text-anchor": "top"
-//            },
-//            "paint": {
-//                "text-color": "#000",
-//                "text-halo-color": "#fff",
-//                "text-halo-width": 1,
-//                "text-halo-blur": 3
-//            }
-//        });
-//
-////            var json = {"type":""};
-//            var str = JSON.stringify(e.lngLat);
-//            stompClient.send("/app/route", {}, str);
-//
-//    });
+            routeLayer.removeLayer(startMarker);
+            routeLayer.removeLayer(routeFeature);
+            routeLayer.removeLayer(stopMarker);
+            startMarker = L.marker(e.latlng).addTo(routeLayer);
+            startMarker.bindTooltip("Depart now ...", {permanent: true, offset: [0, 0]});
+            var str = JSON.stringify(e.latlng);
+            stompClient.send("/app/route", {}, str);
+        });
+
+
     }
 
     $(function () {
