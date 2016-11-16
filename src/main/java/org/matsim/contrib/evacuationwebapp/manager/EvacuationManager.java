@@ -145,6 +145,7 @@ public class EvacuationManager {
         obs.updateCellColors();
 
         this.grid = new FeatureCollection();
+        boolean first = true;
         for (Grid.Cell cell : grid.getCells()) {
             if (cell.c == Grid.CellColor.white) {
                 continue;
@@ -160,6 +161,18 @@ public class EvacuationManager {
             ret.setGeometry(geo);
             ret.setProperty("color", cell.c.toString());
             ret.setProperty("time", cell.time);
+            if (first) {
+                double maxTT = obs.getMAXTT();
+                ret.setProperty("green", maxTT * 0.3);
+                ret.setProperty("lime", maxTT * 0.4);
+                ret.setProperty("yellow", maxTT * 0.5);
+                ret.setProperty("orange", maxTT * 0.6);
+                ret.setProperty("red", maxTT * 0.7);
+                ret.setProperty("fuchsia", maxTT * 0.8);
+                ret.setProperty("purple", maxTT);
+                first = false;
+            }
+
             this.grid.add(ret);
         }
 

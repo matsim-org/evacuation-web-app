@@ -9,7 +9,7 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.controller;
+package org.matsim.contrib.evacuationwebapp;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;

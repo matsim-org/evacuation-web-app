@@ -49,7 +49,7 @@ public class MATSimScenarioGenerator {
 
         c.travelTimeCalculator().setTravelTimeCalculatorType("TravelTimeCalculatorHashMap");
 
-        c.controler().setCreateGraphs(false);
+        c.controler().setCreateGraphs(true);
         c.controler().setDumpDataAtEnd(true);
         c.controler().setWriteEventsInterval(20);
         c.controler().setWritePlansInterval(20);

@@ -106,6 +106,20 @@
             color: #777;
         }
 
+        .legend {
+            text-align: left;
+            line-height: 18px;
+            color: #555;
+        }
+
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+
     </style>
 </head>
 <body>
@@ -200,6 +214,7 @@
     var startMarker;
     var routingHandler;
     var info;
+    var legend
 
     var slideIndex = 1;
     showDivs(slideIndex);
@@ -346,14 +361,14 @@
             stompClient.connect({}, function (frame) {
                 setConnected(true);
                 console.log('Connected: ' + frame);
-                stompClient.subscribe('/topic/evacuation', function (greeting) {
+                stompClient.subscribe('/user/topic/evacuation', function (greeting) {
                     if (greeting != null) {
                         showGrid(JSON.parse(greeting.body));
                     } else {
                         alert("Could not run evacuation simulation, please select smaller area and try again!");
                     }
                 });
-                stompClient.subscribe('/topic/routing', function (route) {
+                stompClient.subscribe('/user/topic/routing', function (route) {
                     if (route != null) {
                         showRoute(JSON.parse(route.body));
                     } else {
@@ -377,6 +392,8 @@
         routeLayer.removeLayer(stopMarker);
         routeLayer.removeLayer(routeFeature);
         hexGridLayer.removeLayer(hexGridFeatures);
+        map.removeControl(legend);
+        map.removeControl(info);
         map.off('click');
         setConnected(false);
 
@@ -511,6 +528,33 @@
         };
         info.addTo(map);
 
+
+        var props = message.features[0].properties;
+        var grades = [0, props.green, props.lime, props.yellow, props.orange, props.red, props.fuchsia];
+        var colors = ['green', 'lime', 'yellow', 'orange', 'red', 'fuchsia', 'purple'];
+
+        legend = L.control({position: 'bottomright'});
+
+        legend.onAdd = function (map) {
+
+            var div = L.DomUtil.create('div', 'info legend'),
+                    labels = [],
+                    from, to;
+
+            for (var i = 0; i < grades.length; i++) {
+                from = grades[i];
+                to = grades[i + 1];
+
+                labels.push(
+                        '<i style="background:' + colors[i] + '"></i> ' +
+                        toHHMMSS(from) + (to ? ' &ndash; ' + toHHMMSS(to) : '+'));
+            }
+
+            div.innerHTML = labels.join('<br>');
+            return div;
+        };
+
+        legend.addTo(map);
 
     }
 

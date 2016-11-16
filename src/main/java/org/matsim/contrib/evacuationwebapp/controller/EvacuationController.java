@@ -21,7 +21,7 @@ import org.geojson.FeatureCollection;
 import org.matsim.contrib.evacuationwebapp.manager.EvacuationManager;
 import org.matsim.contrib.evacuationwebapp.manager.LngLat;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class EvacuationController {
 
+    private long sessions = 0;
 
     private EvacuationManager em;
 
@@ -40,7 +41,7 @@ public class EvacuationController {
     private static final Logger log = Logger.getLogger(EvacuationController.class);
 
     @MessageMapping("/evac")
-    @SendTo("/topic/evacuation")
+    @SendToUser("/topic/evacuation")
     public FeatureCollection evacuationArea(@RequestBody Feature[] message) throws Exception {
 
         Injector injector = Guice.createInjector(new AbstractModule() {
@@ -61,11 +62,13 @@ public class EvacuationController {
     }
 
     @MessageMapping("/route")
-    @SendTo("/topic/routing")
+    @SendToUser("/topic/routing")
     public FeatureCollection evacuationRoute(LngLat message) throws Exception {
 
 //        this.em.calcRoute(message);
 
         return em.getRoute(message);
     }
+
+
 }

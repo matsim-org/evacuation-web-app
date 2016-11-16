@@ -34,6 +34,7 @@ public class EvacuationTimeObserver implements PersonDepartureEventHandler, Pers
     private final Map<Grid.Cell, TTInfo> tt = new HashMap<>();
     private final Grid grid;
     private final Scenario sc;
+    private double maxTT;
 
 //    private double maxTT = 0;
 
@@ -81,6 +82,7 @@ public class EvacuationTimeObserver implements PersonDepartureEventHandler, Pers
             }
 
         }
+        this.maxTT = maxTT;
 
         for (Map.Entry<Grid.Cell, TTInfo> entry : es) {
             double rel = entry.getValue().tt / maxTT;
@@ -101,6 +103,10 @@ public class EvacuationTimeObserver implements PersonDepartureEventHandler, Pers
             }
             entry.getKey().time = entry.getValue().tt;
         }
+    }
+
+    public double getMAXTT() {
+        return maxTT;
     }
 
     private final class TTInfo {
