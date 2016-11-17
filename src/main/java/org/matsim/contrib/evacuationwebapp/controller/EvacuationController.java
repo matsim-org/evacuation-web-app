@@ -12,14 +12,11 @@
 package org.matsim.contrib.evacuationwebapp.controller;
 
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import org.apache.log4j.Logger;
 import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.Point;
-import org.matsim.contrib.evacuationwebapp.manager.EvacuationManager;
+import org.matsim.contrib.evacuationwebapp.evacuation.EvacuationManager;
 import org.matsim.contrib.evacuationwebapp.utils.SessionIDGenerator;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -45,19 +42,9 @@ public class EvacuationController {
     @SendToUser("/topic/evacuation")
     public FeatureCollection evacuationArea(@RequestBody Feature[] message) throws Exception {
 
-        Injector injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(Feature.class).toInstance(message[0]);
 
-            }
-        });
+        this.em = new EvacuationManager(message[0]);
 
-        EvacuationManager em = injector.getInstance(EvacuationManager.class);
-
-        this.em = em;
-
-        em.run();
 
         return em.getFeatureCollection();
     }

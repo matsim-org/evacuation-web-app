@@ -9,20 +9,19 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.manager;
+package org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions;
 
-import de.westnordost.osmapi.map.data.Way;
-import org.matsim.api.core.v01.network.Link;
 
 /**
- * Created by laemmel on 06/11/2016.
+ * Created by laemmel on 17/11/2016.
  */
-public interface OSMWayFilter {
+public class SessionAlreadyExistsException extends RuntimeException {
 
-    boolean rejectWay(Way way);
+    public SessionAlreadyExistsException() {
+        super();
+    }
 
-    void configureLink(Way way, Link link);
-
-    boolean isOneway(Way way);
-
+    public SessionAlreadyExistsException(String msg) {
+        super(msg);
+    }
 }

@@ -9,11 +9,10 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.manager;
+package org.matsim.contrib.evacuationwebapp.evacuation;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -40,7 +39,6 @@ import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleUtils;
-import org.springframework.context.annotation.Scope;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,15 +46,13 @@ import java.util.List;
 /**
  * Created by laemmel on 01/11/2016.
  */
-@Scope("session")
 public class EvacuationManager {
 
     private static final Logger log = Logger.getLogger(EvacuationManager.class);
 
     private static final int MAX_DEMAND = 25000;
 
-    @Inject
-    Feature evacuationArea;
+    private final Feature evacuationArea;
     private FeatureCollection grid;
     private Transformer transformer;
 
@@ -67,7 +63,16 @@ public class EvacuationManager {
     private OSMNetwork osmNetwork;
 
 
-    public void run() {
+    private boolean isInitialized = false;
+
+    public EvacuationManager(Feature evacuationArea) {
+        this.evacuationArea = evacuationArea;
+    }
+
+    public synchronized void init() {
+        if (isInitialized) {
+            return;
+        }
 
 
         Envelope e = Geometries.getEnvelope(evacuationArea);
@@ -176,12 +181,13 @@ public class EvacuationManager {
             this.grid.add(ret);
         }
 
+        isInitialized = true;
 
     }
 
 
-    public FeatureCollection getRoute(LngLatAlt start) {
-
+    public synchronized FeatureCollection getRoute(LngLatAlt start) {
+        init();
         Coord coord = this.transformer.toUTM(start);
         Node from = this.osmNetwork.getClosestNode(coord);
         Person p = sc.getPopulation().getFactory().createPerson(Id.createPersonId(0));
@@ -215,6 +221,7 @@ public class EvacuationManager {
 
 
     public FeatureCollection getFeatureCollection() {
+        init();
         return this.grid;
     }
 

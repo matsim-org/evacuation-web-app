@@ -9,7 +9,7 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.manager;
+package org.matsim.contrib.evacuationwebapp.evacuation;
 
 import de.westnordost.osmapi.map.data.Way;
 import org.apache.log4j.Logger;

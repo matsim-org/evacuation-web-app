@@ -9,11 +9,8 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.manager;
+package org.matsim.contrib.evacuationwebapp.evacuation;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import org.geojson.*;
 import org.junit.Test;
 
@@ -46,16 +43,7 @@ public class EvacuationManagerTest {
 
         ft.setProperty("num", "500");
 
-        Injector injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(Feature.class).toInstance(ft);
-
-            }
-        });
-
-        EvacuationManager em = injector.getInstance(EvacuationManager.class);
-        em.run();
+        EvacuationManager em = new EvacuationManager(ft);
         FeatureCollection ftcoll = em.getFeatureCollection();
 
         assertThat(ftcoll.getFeatures().size(), is(3));
