@@ -70,5 +70,11 @@ public class EvacuationController {
         return em.getRoute(message);
     }
 
+    @MessageMapping("/session")
+    @SendToUser("/topic/sessionid")
+    public Long sessionId(String msg) throws Exception {
+        return sessions++;
+    }
+
 
 }
