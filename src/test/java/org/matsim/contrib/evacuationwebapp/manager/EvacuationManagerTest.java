@@ -76,7 +76,7 @@ public class EvacuationManagerTest {
             assertThat(color.toString(), is("green"));
         }
 
-        LngLat ll = new LngLat(-74.03363892451813, 40.753928071164495);
+        LngLatAlt ll = new LngLatAlt(-74.03363892451813, 40.753928071164495);
 
         FeatureCollection route = em.getRoute(ll);
         assertThat(route.getFeatures().size(), is(2));

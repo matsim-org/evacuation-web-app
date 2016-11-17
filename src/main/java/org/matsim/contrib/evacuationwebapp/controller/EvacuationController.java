@@ -18,8 +18,8 @@ import com.google.inject.Injector;
 import org.apache.log4j.Logger;
 import org.geojson.Feature;
 import org.geojson.FeatureCollection;
+import org.geojson.Point;
 import org.matsim.contrib.evacuationwebapp.manager.EvacuationManager;
-import org.matsim.contrib.evacuationwebapp.manager.LngLat;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
@@ -63,11 +63,14 @@ public class EvacuationController {
 
     @MessageMapping("/route")
     @SendToUser("/topic/routing")
-    public FeatureCollection evacuationRoute(LngLat message) throws Exception {
+    public FeatureCollection evacuationRoute(@RequestBody Feature message) throws Exception {
 
 //        this.em.calcRoute(message);
+//         message.getGeometry().get
 
-        return em.getRoute(message);
+
+//        message.getGeometry().
+        return em.getRoute(((Point) message.getGeometry()).getCoordinates());
     }
 
     @MessageMapping("/session")

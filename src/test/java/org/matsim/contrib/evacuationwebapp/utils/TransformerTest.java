@@ -21,7 +21,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.api.core.v01.Coord;
-import org.matsim.contrib.evacuationwebapp.manager.LngLat;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -166,12 +165,6 @@ public class TransformerTest {
 
     }
 
-    @Test
-    public void toUTMCLngLat() {
-        Coord c = this.transformer.toUTM(new LngLat(-73.97232055, 40.77953338));
-        assertThat(c.getX(), is(closeTo(1600636.727802, UTM_EPS)));
-        assertThat(c.getY(), is(closeTo(4596780.663655, UTM_EPS)));
-    }
 
     @Test
     public void toUTMCLngLatAlt() {

@@ -321,7 +321,9 @@
 
 
         var data = drawnItems.getLayers()[0].toGeoJSON();
+        data.properties["sessionid"] = sessionid;
         data.properties["num"] = $("#number").val();
+
         stompClient.send("/app/evac", {}, JSON.stringify([data]));
         setSubmitted(true);
     }
@@ -432,8 +434,18 @@
             routeLayer.removeLayer(stopMarker);
             startMarker = L.marker(e.latlng).addTo(routeLayer);
             startMarker.bindTooltip("Depart now ...", {permanent: true, offset: [0, 0]});
-            var str = JSON.stringify(e.latlng);
-            stompClient.send("/app/route", {}, str);
+            var geojsonFeature = {
+                "type": "Feature",
+                "properties": {
+                    "sessionid": sessionid
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [e.latlng.lng, e.latlng.lat]
+                }
+            };
+//            var str = JSON.stringify(e.latlng);
+            stompClient.send("/app/route", {}, JSON.stringify(geojsonFeature));
         });
 
         info = L.control();

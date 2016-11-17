@@ -20,7 +20,6 @@ import org.geojson.LngLatAlt;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.Coord;
-import org.matsim.contrib.evacuationwebapp.manager.LngLat;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -92,14 +91,6 @@ public class Transformer {
         }
     }
 
-    public Coord toUTM(LngLat start) {
-        try {
-            Coordinate transformed = JTS.transform(new Coordinate(start.getLng(), start.getLat()), null, this.transformation);
-            return CoordUtils.createCoord(transformed.x, transformed.y);
-        } catch (TransformException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public Coord toUTM(LngLatAlt c) {
         try {

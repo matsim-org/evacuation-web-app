@@ -180,7 +180,7 @@ public class EvacuationManager {
     }
 
 
-    public FeatureCollection getRoute(LngLat start) {
+    public FeatureCollection getRoute(LngLatAlt start) {
 
         Coord coord = this.transformer.toUTM(start);
         Node from = this.osmNetwork.getClosestNode(coord);
