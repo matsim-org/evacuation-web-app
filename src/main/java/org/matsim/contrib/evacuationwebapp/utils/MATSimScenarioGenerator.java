@@ -26,6 +26,7 @@ public class MATSimScenarioGenerator {
     public static Scenario createScenario(double sample, String session) {
         Config c = ConfigUtils.createConfig();
 
+        c.global().setRandomSeed(4711L);
         c.global().setNumberOfThreads(6);
 
         c.controler().setCreateGraphs(false);
@@ -49,10 +50,9 @@ public class MATSimScenarioGenerator {
 
         c.travelTimeCalculator().setTravelTimeCalculatorType("TravelTimeCalculatorHashMap");
 
-        c.controler().setCreateGraphs(true);
-        c.controler().setDumpDataAtEnd(true);
-        c.controler().setWriteEventsInterval(20);
-        c.controler().setWritePlansInterval(20);
+        c.controler().setDumpDataAtEnd(false);
+        c.controler().setWriteEventsInterval(0);
+        c.controler().setWritePlansInterval(0);
 //        c.controler().setWritePlansUntilIteration(20);
 
 

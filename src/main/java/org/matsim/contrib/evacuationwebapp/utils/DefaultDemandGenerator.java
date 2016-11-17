@@ -17,6 +17,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.gbl.MatsimRandom;
 
+import java.util.Random;
 import java.util.TreeMap;
 
 /**
@@ -25,6 +26,10 @@ import java.util.TreeMap;
 public abstract class DefaultDemandGenerator {
 
     public static void createDemand(Scenario sc, Id<Link> sl, int cnt) {
+
+        Random r = MatsimRandom.getLocalInstance();
+        r.setSeed(4711L);
+
         TreeMap<Double, Link> links = new TreeMap<>();
         double totalWeight = 0;
         for (Link l : sc.getNetwork().getLinks().values()) {
