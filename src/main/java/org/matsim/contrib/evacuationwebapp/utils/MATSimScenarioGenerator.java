@@ -23,14 +23,14 @@ import org.matsim.core.scenario.ScenarioUtils;
  */
 public class MATSimScenarioGenerator {
 
-    public static Scenario createScenario(double sample) {
+    public static Scenario createScenario(double sample, String session) {
         Config c = ConfigUtils.createConfig();
 
         c.global().setNumberOfThreads(6);
 
-
+        c.controler().setCreateGraphs(false);
         c.controler().setLastIteration(20);
-        c.controler().setOutputDirectory("/tmp/output");
+        c.controler().setOutputDirectory("/tmp/output/" + session);
         c.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
         c.qsim().setFlowCapFactor(sample);

@@ -43,8 +43,8 @@ public class EvacuationManagerTest {
 
         ft.setProperty("num", "500");
 
-        EvacuationManager em = new EvacuationManager(ft);
-        FeatureCollection ftcoll = em.getFeatureCollection();
+        EvacuationManager em = new EvacuationManager(ft, "test");
+        FeatureCollection ftcoll = em.getGrid();
 
         assertThat(ftcoll.getFeatures().size(), is(3));
 

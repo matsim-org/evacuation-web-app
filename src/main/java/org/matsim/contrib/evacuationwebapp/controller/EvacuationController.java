@@ -16,7 +16,9 @@ import org.apache.log4j.Logger;
 import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.Point;
-import org.matsim.contrib.evacuationwebapp.evacuation.EvacuationManager;
+import org.matsim.contrib.evacuationwebapp.sessionsmanager.SessionsManager;
+import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlreadyExistsException;
+import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
 import org.matsim.contrib.evacuationwebapp.utils.SessionIDGenerator;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -31,10 +33,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class EvacuationController {
 
+
+    private final SessionsManager sm = new SessionsManager();
+
     private long sessions = 0;
-
-    private EvacuationManager em;
-
 
     private static final Logger log = Logger.getLogger(EvacuationController.class);
 
@@ -42,25 +44,36 @@ public class EvacuationController {
     @SendToUser("/topic/evacuation")
     public FeatureCollection evacuationArea(@RequestBody Feature[] message) throws Exception {
 
-
-        this.em = new EvacuationManager(message[0]);
-
-
-        return em.getFeatureCollection();
+        String id = message[0].getProperty("sessionid");
+        try {
+            this.sm.initializeNewSession(id, message[0]);
+            return this.sm.getEvacuationAnalysisGrid(id);
+        } catch (SessionAlreadyExistsException e) {
+            log.warn(e);
+        }
+        return new FeatureCollection();
     }
 
     @MessageMapping("/route")
     @SendToUser("/topic/routing")
     public FeatureCollection evacuationRoute(@RequestBody Feature message) throws Exception {
+        FeatureCollection ret = new FeatureCollection();
 
-        return em.getRoute(((Point) message.getGeometry()).getCoordinates());
+        String id = message.getProperty("sessionid");
+        try {
+            ret = this.sm.getEvacuationRoute(id, ((Point) message.getGeometry()).getCoordinates());
+        } catch (UnknownSessionException e) {
+            log.warn(e);
+        }
+        return ret;
     }
 
     @MessageMapping("/session")
     @SendToUser("/topic/sessionid")
     public String sessionId(String msg) throws Exception {
         sessions++;
-        return SessionIDGenerator.getNextSessionID();
+        String id = SessionIDGenerator.getNextSessionID();
+        return id;
     }
 
 

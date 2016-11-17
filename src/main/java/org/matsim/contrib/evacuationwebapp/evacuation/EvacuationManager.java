@@ -53,6 +53,7 @@ public class EvacuationManager {
     private static final int MAX_DEMAND = 25000;
 
     private final Feature evacuationArea;
+    private final String session;
     private FeatureCollection grid;
     private Transformer transformer;
 
@@ -65,7 +66,8 @@ public class EvacuationManager {
 
     private boolean isInitialized = false;
 
-    public EvacuationManager(Feature evacuationArea) {
+    public EvacuationManager(Feature evacuationArea, String session) {
+        this.session = session;
         this.evacuationArea = evacuationArea;
     }
 
@@ -88,7 +90,7 @@ public class EvacuationManager {
             demand = MAX_DEMAND;
         }
 
-        this.sc = MATSimScenarioGenerator.createScenario(sample);
+        this.sc = MATSimScenarioGenerator.createScenario(sample, session);
 
 
         BoundingBox boundingBox = new BoundingBox(e.getMinY(), e.getMinX(), e.getMaxY(), e.getMaxX());
@@ -218,9 +220,7 @@ public class EvacuationManager {
     }
 
 
-
-
-    public FeatureCollection getFeatureCollection() {
+    public FeatureCollection getGrid() {
         init();
         return this.grid;
     }

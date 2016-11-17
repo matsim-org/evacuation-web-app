@@ -305,6 +305,7 @@
             stompClient.disconnect();
         }
 
+        sessionid = "";
 
         routeLayer.removeLayer(startMarker);
         routeLayer.removeLayer(stopMarker);
@@ -332,24 +333,30 @@
 
     function showRoute(route) {
 
-        var coords = route.features[0].geometry.coordinates[0];
-        var latLng = new L.LatLng(coords[1], coords[0]);
-        startMarker.setLatLng(latLng);
+        try {
 
-        routeFeature = L.geoJson(route, {
-            style: styleRoute
-        }).addTo(routeLayer);
+            var coords = route.features[0].geometry.coordinates[0];
+            var latLng = new L.LatLng(coords[1], coords[0]);
+            startMarker.setLatLng(latLng);
 
-        var ft = route.features[route.features.length - 1]
-        var coords1 = ft.geometry.coordinates[ft.geometry.coordinates.length - 1];
+            routeFeature = L.geoJson(route, {
+                style: styleRoute
+            }).addTo(routeLayer);
 
-        var latLng1 = new L.LatLng(coords1[1], coords1[0]);
-        stopMarker = L.marker(latLng1).addTo(routeLayer);
+            var ft = route.features[route.features.length - 1]
+            var coords1 = ft.geometry.coordinates[ft.geometry.coordinates.length - 1];
 
-        stopMarker.bindTooltip("... arrive in " + toHHMMSS(route.features[0].properties.time) + ".", {
-            permanent: true,
-            offset: [0, 0]
-        });
+            var latLng1 = new L.LatLng(coords1[1], coords1[0]);
+            stopMarker = L.marker(latLng1).addTo(routeLayer);
+
+            stopMarker.bindTooltip("... arrive in " + toHHMMSS(route.features[0].properties.time) + ".", {
+                permanent: true,
+                offset: [0, 0]
+            });
+        } catch (err) {
+            alert("An error occured:\n" + err.message + "\ntrying to reload!");
+            location.reload(true);
+        }
 
     }
 
@@ -421,73 +428,78 @@
 
     function showGrid(message) {
 
+        try {
 
-        hexGridFeatures = L.geoJson(message, {
-            style: styleGrid,
-            onEachFeature: onEachFeature
-        }).addTo(hexGridLayer);
+            hexGridFeatures = L.geoJson(message, {
+                style: styleGrid,
+                onEachFeature: onEachFeature
+            }).addTo(hexGridLayer);
 
-        routingHandler = map.on('click', function (e) {
+            routingHandler = map.on('click', function (e) {
 
-            routeLayer.removeLayer(startMarker);
-            routeLayer.removeLayer(routeFeature);
-            routeLayer.removeLayer(stopMarker);
-            startMarker = L.marker(e.latlng).addTo(routeLayer);
-            startMarker.bindTooltip("Depart now ...", {permanent: true, offset: [0, 0]});
-            var geojsonFeature = {
-                "type": "Feature",
-                "properties": {
-                    "sessionid": sessionid
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [e.latlng.lng, e.latlng.lat]
-                }
-            };
+                routeLayer.removeLayer(startMarker);
+                routeLayer.removeLayer(routeFeature);
+                routeLayer.removeLayer(stopMarker);
+                startMarker = L.marker(e.latlng).addTo(routeLayer);
+                startMarker.bindTooltip("Depart now ...", {permanent: true, offset: [0, 0]});
+                var geojsonFeature = {
+                    "type": "Feature",
+                    "properties": {
+                        "sessionid": sessionid
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [e.latlng.lng, e.latlng.lat]
+                    }
+                };
 //            var str = JSON.stringify(e.latlng);
-            stompClient.send("/app/route", {}, JSON.stringify(geojsonFeature));
-        });
+                stompClient.send("/app/route", {}, JSON.stringify(geojsonFeature));
+            });
 
-        info = L.control();
-        info.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'info');
-            this.update();
-            return this._div;
-        };
-        info.update = function (time) {
-            this._div.innerHTML = '<h4>Average evacuation time per cell</h4>' + (time ?
-                    '<b>' + toHHMMSS(time) + ' [HH:MM:SS]</b>'
-                            : 'Hover over a cell');
-        };
-        info.addTo(map);
+            info = L.control();
+            info.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info');
+                this.update();
+                return this._div;
+            };
+            info.update = function (time) {
+                this._div.innerHTML = '<h4>Average evacuation time per cell</h4>' + (time ?
+                        '<b>' + toHHMMSS(time) + ' [HH:MM:SS]</b>'
+                                : 'Hover over a cell');
+            };
+            info.addTo(map);
 
 
-        var props = message.features[0].properties;
-        var grades = [0, props.green, props.lime, props.yellow, props.orange, props.red, props.fuchsia];
-        var colors = ['green', 'lime', 'yellow', 'orange', 'red', 'fuchsia', 'purple'];
+            var props = message.features[0].properties;
+            var grades = [0, props.green, props.lime, props.yellow, props.orange, props.red, props.fuchsia];
+            var colors = ['green', 'lime', 'yellow', 'orange', 'red', 'fuchsia', 'purple'];
 
-        legend = L.control({position: 'bottomright'});
+            legend = L.control({position: 'bottomright'});
 
-        legend.onAdd = function (map) {
+            legend.onAdd = function (map) {
 
-            var div = L.DomUtil.create('div', 'info legend'),
-                    labels = [],
-                    from, to;
+                var div = L.DomUtil.create('div', 'info legend'),
+                        labels = [],
+                        from, to;
 
-            for (var i = 0; i < grades.length; i++) {
-                from = grades[i];
-                to = grades[i + 1];
+                for (var i = 0; i < grades.length; i++) {
+                    from = grades[i];
+                    to = grades[i + 1];
 
-                labels.push(
-                        '<i style="background:' + colors[i] + '"></i> ' +
-                        toHHMMSS(from) + (to ? ' &ndash; ' + toHHMMSS(to) : '+'));
-            }
+                    labels.push(
+                            '<i style="background:' + colors[i] + '"></i> ' +
+                            toHHMMSS(from) + (to ? ' &ndash; ' + toHHMMSS(to) : '+'));
+                }
 
-            div.innerHTML = labels.join('<br>');
-            return div;
-        };
+                div.innerHTML = labels.join('<br>');
+                return div;
+            };
 
-        legend.addTo(map);
+            legend.addTo(map);
+        } catch (err) {
+            alert("An error occured:\n" + err.message + "\ntrying to reload!");
+            location.reload(true);
+        }
 
     }
 
