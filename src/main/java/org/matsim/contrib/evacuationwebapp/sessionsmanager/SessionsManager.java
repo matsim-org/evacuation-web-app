@@ -19,6 +19,7 @@ import org.matsim.contrib.evacuationwebapp.evacuation.EvacuationManager;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlreadyExistsException;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -78,6 +79,24 @@ public class SessionsManager {
         Request r = new Request(RequestType.Shutdown);
         w.addRequest(r);
         r.getResponse();
+    }
+
+    public void shutdown() {
+        Iterator<Map.Entry<String, Worker>> it = this.workers.entrySet().iterator();
+        while (it.hasNext()) {
+            Request r = new Request(RequestType.Shutdown);
+            it.next().getValue().addRequest(r);
+            it.remove();
+            r.getResponse();
+        }
+        while (this.threads.peek() != null) {
+            Thread t = this.threads.poll();
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private static final class Worker implements Runnable {
