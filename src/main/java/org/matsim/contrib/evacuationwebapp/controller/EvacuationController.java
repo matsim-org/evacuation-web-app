@@ -20,6 +20,7 @@ import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.Point;
 import org.matsim.contrib.evacuationwebapp.manager.EvacuationManager;
+import org.matsim.contrib.evacuationwebapp.utils.SessionIDGenerator;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
@@ -65,18 +66,14 @@ public class EvacuationController {
     @SendToUser("/topic/routing")
     public FeatureCollection evacuationRoute(@RequestBody Feature message) throws Exception {
 
-//        this.em.calcRoute(message);
-//         message.getGeometry().get
-
-
-//        message.getGeometry().
         return em.getRoute(((Point) message.getGeometry()).getCoordinates());
     }
 
     @MessageMapping("/session")
     @SendToUser("/topic/sessionid")
-    public Long sessionId(String msg) throws Exception {
-        return sessions++;
+    public String sessionId(String msg) throws Exception {
+        sessions++;
+        return SessionIDGenerator.getNextSessionID();
     }
 
 

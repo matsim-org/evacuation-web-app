@@ -272,9 +272,9 @@
             stompClient.connect({}, function (frame) {
 
                 console.log('Connected: ' + frame);
-                stompClient.subscribe('/user/topic/sessionid', function (sessionid) {
-                    console.log(sessionid.body);
-                    sessionid = sessionid.body;
+                stompClient.subscribe('/user/topic/sessionid', function (id) {
+                    console.log(id.body);
+                    sessionid = id.body;
                     setConnected(true);
                 });
                 stompClient.subscribe('/user/topic/evacuation', function (greeting) {
