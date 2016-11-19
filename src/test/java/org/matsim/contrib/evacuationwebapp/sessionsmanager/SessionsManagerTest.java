@@ -13,9 +13,11 @@ package org.matsim.contrib.evacuationwebapp.sessionsmanager;
 
 import org.geojson.*;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlreadyExistsException;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
+import org.matsim.contrib.evacuationwebapp.utils.Configuration;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -32,6 +34,11 @@ public class SessionsManagerTest {
 
     private SessionsManager m;
     private Feature ft1;
+
+    @BeforeClass
+    public static void setOverpassAddressToLocal() {
+        Configuration.OVERPASS_ADDRESS = "http://localhost:9090/api/";
+    }
 
     @Before
     public void intialize() {

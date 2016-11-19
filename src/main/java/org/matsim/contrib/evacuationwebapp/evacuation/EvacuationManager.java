@@ -97,6 +97,7 @@ public class EvacuationManager {
 
         this.osmNetwork = new OSMNetwork(utmE);
 
+
         Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {

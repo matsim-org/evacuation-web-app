@@ -19,11 +19,13 @@ import de.westnordost.osmapi.map.data.BoundingBox;
 import de.westnordost.osmapi.map.handler.MapDataHandler;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthConsumer;
+import org.matsim.contrib.evacuationwebapp.utils.Configuration;
 
 /**
  * Created by laemmel on 01/11/2016.
  */
 public class OSMParser {
+
 
     @Inject
     BoundingBox boundingBox;
@@ -34,9 +36,9 @@ public class OSMParser {
 
     public void run() {
         OAuthConsumer auth = new DefaultOAuthConsumer("null", "null");
-        OsmConnection osm = new OsmConnection("http://overpass-api.de/api/",
+        OsmConnection osm = new OsmConnection(Configuration.OVERPASS_ADDRESS,
                 "agent Smith", auth);
-//        OsmConnection osm = new OsmConnection("http://localhost/api/",
+//        OsmConnection osm = new OsmConnection("http://localhost:9090/api/",
 //                "agent Smith", auth);
 
         MapDataDao mapDao = new MapDataDao(osm);
