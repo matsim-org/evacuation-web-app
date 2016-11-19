@@ -12,9 +12,7 @@
 package org.matsim.contrib.evacuationwebapp.evacuation;
 
 import org.geojson.*;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.matsim.contrib.evacuationwebapp.utils.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +27,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class EvacuationManagerTest {
 
 
-    @BeforeClass
-    public static void setOverpassAddressToLocal() {
-        Configuration.OVERPASS_ADDRESS = "http://localhost:9090/api/";
-    }
+//    @BeforeClass
+//    public static void setOverpassAddressToLocal() {
+//        Configuration.OVERPASS_ADDRESS = "http://localhost:9090/api/";
+//    }
 
     @Test
     public void testRun() {
