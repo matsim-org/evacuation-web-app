@@ -23,6 +23,11 @@ If you intend to run large scenarios you have to adapt the `-Xmx` option accordi
 After the backend is up and running open the web browser of your choice and enter http://localhost:8080.
 This will show you the frontend with more instructions on how to define the scenario and run the simulation.
 
+#Running test cases
+Test cases relay on a local overpass server listening on port 9090. If you have docker you can start it by invoking
+    docker pull grgrlmml/overpass-api-4-tests
+    docker run -d -p 9090:9090 grgrlmml/overpass-api-4-tests
+
 #How to contribute
 If you found bugs or if you want to contribute to this project please feel free to contact us via github.
 

@@ -37,7 +37,7 @@ public class OSMParser {
     public void run() {
         OAuthConsumer auth = new DefaultOAuthConsumer("null", "null");
         OsmConnection osm = new OsmConnection(Configuration.OVERPASS_ADDRESS,
-                "agent Smith", auth);
+                "Agent Smith", auth);
 //        OsmConnection osm = new OsmConnection("http://localhost:9090/api/",
 //                "agent Smith", auth);
 
