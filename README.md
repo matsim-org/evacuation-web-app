@@ -5,17 +5,21 @@ While the evacuation scenario is defined on an interactive map in your web brows
 the actual simulation run's on a (local instantiated) server (backend).
 
 #Prerequisites
+
 Java >= 1.8; 
 Maven; 
 A firewall configuration that let you open server port 8080 (for local connections)
 
 #Installation
+
     git clone https://github.com/matsim-org/evacuation-web-app.git
 
 #Bild and run
+
     cd evacuation-web-app
     mvn clean package
     java -Xmx8G -jar target/evacuation-web-app-0.1-SNAPSHOT.jar
+
 This will build and start the backend.
 The `-Xmx8G` option makes sure that the Java VM has at most 8 Gigabytes of RAM available. 
 This is sufficient for running small and medium size szenarios (e.g. a town or a smaller district of a city).
