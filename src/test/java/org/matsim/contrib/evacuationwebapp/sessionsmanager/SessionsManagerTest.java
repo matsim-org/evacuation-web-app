@@ -29,7 +29,6 @@ import java.util.Queue;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
 
 /**
  * Created by laemmel on 17/11/2016.
@@ -144,7 +143,7 @@ public class SessionsManagerTest {
 
                         LngLatAlt ll = new LngLatAlt(-74.03363892451813, 40.753928071164495);
                         FeatureCollection route = SessionsManagerTest.this.m.getEvacuationRoute("client", ll);
-                        assertThat(route, is(not(null)));
+                        validateRoute(route);
                     }
 
                 }
