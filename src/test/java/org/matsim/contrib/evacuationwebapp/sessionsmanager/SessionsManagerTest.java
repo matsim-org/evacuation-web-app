@@ -12,6 +12,7 @@
 package org.matsim.contrib.evacuationwebapp.sessionsmanager;
 
 import org.geojson.*;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,8 +26,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 
 /**
  * Created by laemmel on 17/11/2016.
@@ -57,11 +60,11 @@ public class SessionsManagerTest {
         ft1.setProperty("num", "500");
     }
 
-//    @After
-//    public void shutdown() {
-//        this.m.shutdown();
-//        this.m = null;
-//    }
+    @After
+    public void shutdown() {
+        this.m.shutdown();
+        this.m = null;
+    }
 
     @Test
     public void shutdownTest() {
@@ -97,27 +100,31 @@ public class SessionsManagerTest {
         this.m.initializeNewSession(s2);
     }
 
-//    @Test(timeout = 120 * 1000) //timeout 120s
-//    public void runSeveralSessions() {
-//        for (int i = 0; i < 4; i++) {
-//            this.m.initializeNewSession("client" + i, this.ft1);
-//        }
-//
-//        for (int i = 0; i < 4; i++) {
-//            FeatureCollection grid = this.m.getEvacuationAnalysisGrid("client" + i);
+    @Test(timeout = 120 * 1000) //timeout 120s
+    public void runSeveralSessions() {
+        for (int i = 0; i < 4; i++) {
+            Session s = new Session("client" + i, this.ft1);
+            this.m.initializeNewSession(s);
+        }
+
+        for (int i = 0; i < 4; i++) {
+            FeatureCollection grid = this.m.getEvacuationAnalysisGrid("client" + i);
+            assertThat(grid, notNullValue());
 //            validateGrid(grid);
-//        }
-//
-//        for (int i = 0; i < 4; i++) {
-//            LngLatAlt ll = new LngLatAlt(-74.03363892451813, 40.753928071164495);
-//            FeatureCollection route = this.m.getEvacuationRoute("client" + i, ll);
+        }
+        this.m.disconnect("client0");
+
+        for (int i = 1; i < 4; i++) {
+            LngLatAlt ll = new LngLatAlt(-74.03363892451813, 40.753928071164495);
+            FeatureCollection route = this.m.getEvacuationRoute("client" + i, ll);
+            assertThat(route, notNullValue());
 //            validateRoute(route);
-//        }
-//
-//        for (int i = 0; i < 4; i++) {
-//            this.m.disconnect("client" + i);
-//        }
-//    }
+        }
+
+        for (int i = 1; i < 4; i++) {
+            this.m.disconnect("client" + i);
+        }
+    }
 
     @Test(timeout = 60 * 1000) //timeout 60s
     public void runParallelQueries() {
@@ -134,9 +141,10 @@ public class SessionsManagerTest {
                     for (int i = 0; i < 10000; i++) {
                         FeatureCollection grid = SessionsManagerTest.this.m.getEvacuationAnalysisGrid("client");
                         validateGrid(grid);
+
                         LngLatAlt ll = new LngLatAlt(-74.03363892451813, 40.753928071164495);
                         FeatureCollection route = SessionsManagerTest.this.m.getEvacuationRoute("client", ll);
-                        validateRoute(route);
+                        assertThat(route, is(not(null)));
                     }
 
                 }
