@@ -15,6 +15,8 @@ package org.matsim.contrib.evacuationwebapp.sessionsmanager;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.geojson.FeatureCollection;
 import org.geojson.LngLatAlt;
 import org.matsim.contrib.evacuationwebapp.evacuation.*;
@@ -42,6 +44,7 @@ public class SessionsManager {
 
     public SessionsManager(OSMAPIURLProvider osmURL) {
         this.osmURL = osmURL;
+        Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
     }
 
     public void initializeNewSession(Session s) throws SessionAlreadyExistsException {
@@ -107,13 +110,58 @@ public class SessionsManager {
     }
 
 
+    private enum RequestType {
+        Grid, Route, Shutdown
+    }
+
+    private static final class Request {
+        private final CountDownLatch latch = new CountDownLatch(1);
+
+        private final RequestType rt;
+        private final LngLatAlt coord;
+
+        private FeatureCollection resp;
+
+
+        Request(RequestType rt) {
+            this(rt, null);
+        }
+
+        Request(RequestType rt, LngLatAlt coord) {
+            this.rt = rt;
+            this.coord = coord;
+        }
+
+        RequestType getRequestType() {
+            return rt;
+        }
+
+        LngLatAlt getCoord() {
+            return this.coord;
+        }
+
+        FeatureCollection getResponse() {
+            try {
+                this.latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            return this.resp;
+        }
+
+        void setResponse(FeatureCollection resp) {
+            this.resp = resp;
+            this.latch.countDown();
+        }
+
+
+    }
+
     private final class Worker implements Runnable {
 
         private final BlockingQueue<Request> requesQueue = new LinkedBlockingQueue<>();
-
-        private EvacuationManager em;
         private final Session session;
-
+        private EvacuationManager em;
         private boolean isRunning = true;
 
         public Worker(Session session) {
@@ -185,52 +233,5 @@ public class SessionsManager {
                 r.setResponse(null);
             }
         }
-    }
-
-    private static final class Request {
-        private final CountDownLatch latch = new CountDownLatch(1);
-
-        private final RequestType rt;
-        private final LngLatAlt coord;
-
-        private FeatureCollection resp;
-
-
-        Request(RequestType rt) {
-            this(rt, null);
-        }
-
-        Request(RequestType rt, LngLatAlt coord) {
-            this.rt = rt;
-            this.coord = coord;
-        }
-
-        RequestType getRequestType() {
-            return rt;
-        }
-
-        LngLatAlt getCoord() {
-            return this.coord;
-        }
-
-        void setResponse(FeatureCollection resp) {
-            this.resp = resp;
-            this.latch.countDown();
-        }
-
-        FeatureCollection getResponse() {
-            try {
-                this.latch.await();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            return this.resp;
-        }
-
-
-    }
-
-    private enum RequestType {
-        Grid, Route, Shutdown
     }
 }

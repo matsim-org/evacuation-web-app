@@ -43,26 +43,17 @@ public class EvacuationManager {
     private static final Logger log = Logger.getLogger(EvacuationManager.class);
 
     private static final int MAX_DEMAND = 25000;
-
+    @Inject
+    Session session;
+    @Inject
+    OSMParser parser;
     private FeatureCollection grid;
-
-
     private LeastCostPathCalculator router;
     //    private Scenario sc;
     private Node safeNode;
     private Id<Link> sl;
-
     @Inject
     private OSMNetwork osmNetwork;
-
-
-    @Inject
-    Session session;
-
-    @Inject
-    OSMParser parser;
-
-
     private boolean isInitialized = false;
 
 
@@ -118,10 +109,10 @@ public class EvacuationManager {
         EvacuationTimeObserver obs = new EvacuationTimeObserver(grid, sc);
         cntr.getEvents().addHandler(obs);
 
-        Level level = Logger.getRootLogger().getLevel();
+//        Level level = Logger.getRootLogger().getLevel();
         Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
         cntr.run();
-        Logger.getRootLogger().setLevel(level);//restore log level
+//        Logger.getRootLogger().setLevel(level);//restore log level
 
         LeastCostPathCalculatorFactory fac = cntr.getLeastCostPathCalculatorFactory();
 

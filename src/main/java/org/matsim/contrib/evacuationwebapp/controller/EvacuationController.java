@@ -35,11 +35,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class EvacuationController {
 
 
-    private final SessionsManager sm = new SessionsManager(() -> "http://overpass-api.de/api/");
-
-    private long sessions = 0;
 
     private static final Logger log = Logger.getLogger(EvacuationController.class);
+    private final SessionsManager sm = new SessionsManager(() -> "http://overpass-api.de/api/");
+    private long sessions = 0;
 
     @MessageMapping("/evac")
     @SendToUser("/topic/evacuation")
