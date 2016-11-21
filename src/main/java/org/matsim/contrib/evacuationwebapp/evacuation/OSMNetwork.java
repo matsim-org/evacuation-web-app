@@ -20,9 +20,8 @@ import org.apache.log4j.Logger;
 import org.geojson.LngLatAlt;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.evacuationwebapp.utils.Transformer;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordUtils;
 
@@ -37,6 +36,7 @@ public class OSMNetwork {
 
     private static final Logger log = Logger.getLogger(OSMNetwork.class);
     private final QuadTree<org.matsim.api.core.v01.network.Node[]> quad;
+    private final Scenario sc;
 
 
     private long linkIds = 0;
@@ -44,11 +44,7 @@ public class OSMNetwork {
     private final Map<Id<Link>, LinkInfo> tracerLinks = new HashMap<>();
 
 
-    @Inject
-    private Transformer transformer;
-
-    @Inject
-    private Network network;
+    private Session session;
 
     @Inject
     private OSMWayFilter filter;
@@ -56,8 +52,12 @@ public class OSMNetwork {
     private Map<Long, NodeInfo> nodes = new HashMap<>();
     private Queue<Way> ways = new LinkedList<>();
 
-    public OSMNetwork(Envelope utmE) {
+    @Inject
+    public OSMNetwork(Session s) {
+        this.session = s;
+        Envelope utmE = s.getUtmE();
         this.quad = new QuadTree<>(utmE.getMinX() - 1000000, utmE.getMinY() - 1000000, utmE.getMaxX() + 1000000, utmE.getMaxY() + 1000000);
+        this.sc = s.getScenario();
     }
 
     public void addNode(Node node) {
@@ -155,26 +155,26 @@ public class OSMNetwork {
     }
 
     private double dist(NodeInfo to, NodeInfo next) {
-        Coord c1 = this.transformer.toUTM(to.node.getPosition());
-        Coord c2 = this.transformer.toUTM(next.node.getPosition());
+        Coord c1 = this.session.getTransformer().toUTM(to.node.getPosition());
+        Coord c2 = this.session.getTransformer().toUTM(next.node.getPosition());
         return CoordUtils.calcProjectedEuclideanDistance(c1, c2);
     }
 
     private void createAndAddLink(NodeInfo from, NodeInfo to, double length, Way way, Id<Link> linkId) {
-        Link l = this.network.getFactory().createLink(linkId, from.matNode, to.matNode);
+        Link l = this.sc.getNetwork().getFactory().createLink(linkId, from.matNode, to.matNode);
         l.setLength(length);
         this.filter.configureLink(way, l);
-        this.network.addLink(l);
+        this.sc.getNetwork().addLink(l);
 
 
     }
 
     private void createAndAddMATSimNode(NodeInfo ni) {
         LatLon pos = ni.node.getPosition();
-        Coord c = this.transformer.toUTM(pos);
-        org.matsim.api.core.v01.network.Node n = this.network.getFactory().createNode(Id.createNodeId(ni.node.getId()), c);
+        Coord c = this.session.getTransformer().toUTM(pos);
+        org.matsim.api.core.v01.network.Node n = this.sc.getNetwork().getFactory().createNode(Id.createNodeId(ni.node.getId()), c);
         ni.matNode = n;
-        this.network.addNode(n);
+        this.sc.getNetwork().addNode(n);
     }
 
     public org.matsim.api.core.v01.network.Node getClosestNode(Coord start) {
@@ -197,10 +197,10 @@ public class OSMNetwork {
 
         List<Id<Link>> rm = new ArrayList<>();
         for (Map.Entry<Id<Link>, LinkInfo> entry : this.tracerLinks.entrySet()) {
-            Link link = this.network.getLinks().get((entry.getKey()));
+            Link link = this.sc.getNetwork().getLinks().get((entry.getKey()));
             if (link != null) {
                 for (LngLatAlt c : entry.getValue().coords) {
-                    Coord utmC = this.transformer.toUTM(c);
+                    Coord utmC = this.session.getTransformer().toUTM(c);
                     this.quad.put(utmC.getX(), utmC.getY(), new org.matsim.api.core.v01.network.Node[]{link.getFromNode(), link.getToNode()});
                 }
             } else {

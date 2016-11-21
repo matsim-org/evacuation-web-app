@@ -12,10 +12,12 @@
 package org.matsim.contrib.evacuationwebapp.sessionsmanager;
 
 
-import org.geojson.Feature;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.geojson.FeatureCollection;
 import org.geojson.LngLatAlt;
-import org.matsim.contrib.evacuationwebapp.evacuation.EvacuationManager;
+import org.matsim.contrib.evacuationwebapp.evacuation.*;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlreadyExistsException;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
 
@@ -33,20 +35,25 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class SessionsManager {
 
+    private final OSMAPIURLProvider osmURL;
 
     private final Map<String, Worker> workers = new ConcurrentHashMap<>();
     private final Queue<Thread> threads = new LinkedList<>();
 
-    public void initializeNewSession(String sessionId, Feature area) throws SessionAlreadyExistsException {
-        Worker w = workers.get(sessionId);
+    public SessionsManager(OSMAPIURLProvider osmURL) {
+        this.osmURL = osmURL;
+    }
+
+    public void initializeNewSession(Session s) throws SessionAlreadyExistsException {
+        Worker w = workers.get(s.getId());
         if (w != null) {
-            throw new SessionAlreadyExistsException("A session with ID: " + sessionId + " already exists.");
+            throw new SessionAlreadyExistsException("A session with ID: " + s.getId() + " already exists.");
         }
-        w = new Worker(area, sessionId);
+        w = new Worker(s);
         Thread t = new Thread(w);
         t.start();
         threads.add(t);
-        workers.put(sessionId, w);
+        workers.put(s.getId(), w);
     }
 
     public FeatureCollection getEvacuationAnalysisGrid(String sessionId) {
@@ -99,27 +106,45 @@ public class SessionsManager {
         }
     }
 
-    private static final class Worker implements Runnable {
+
+    private final class Worker implements Runnable {
 
         private final BlockingQueue<Request> requesQueue = new LinkedBlockingQueue<>();
 
-        private final EvacuationManager em;
+        private EvacuationManager em;
+        private final Session session;
 
-        private boolean isRunning;
+        private boolean isRunning = true;
 
-        public Worker(final Feature area, final String session) {
-            this.em = new EvacuationManager(area, session);
+        public Worker(Session session) {
+            this.session = session;
         }
 
         @Override
         public void run() {
+
+            session.prepare();
+
+            Injector injector = Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(Session.class).toInstance(session);
+                    bind(OSMWayFilter.class).to(OSMVehicularFilter.class);
+                    bind(OSMAPIURLProvider.class).toInstance(SessionsManager.this.osmURL);
+                }
+            });
+
+            this.em = injector.getInstance(EvacuationManager.class);
+
+//            this.em = new EvacuationManager(area,session);
             isRunning = true;
             while (isRunning(true)) {
                 try {
                     Request r = requesQueue.take();
                     switch (r.getRequestType()) {
                         case Grid:
-                            r.setResponse(this.em.getGrid());
+                            FeatureCollection grid = this.em.getGrid();
+                            r.setResponse(grid);
                             break;
                         case Route:
                             r.setResponse(this.em.getRoute(r.getCoord()));

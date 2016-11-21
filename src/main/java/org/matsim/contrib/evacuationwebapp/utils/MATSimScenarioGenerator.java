@@ -12,26 +12,26 @@
 package org.matsim.contrib.evacuationwebapp.utils;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.evacuationwebapp.evacuation.Session;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.scenario.ScenarioUtils;
 
 /**
  * Created by laemmel on 02/11/2016.
  */
 public class MATSimScenarioGenerator {
 
-    public static Scenario createScenario(double sample, String session) {
-        Config c = ConfigUtils.createConfig();
+    public static void createScenario(double sample, Session session) {
+        Scenario sc = session.getScenario();
+        Config c = sc.getConfig();
 
         c.global().setRandomSeed(4711L);
         c.global().setNumberOfThreads(6);
 
         c.controler().setCreateGraphs(false);
         c.controler().setLastIteration(20);
-        c.controler().setOutputDirectory("/tmp/output/" + session);
+        c.controler().setOutputDirectory("/tmp/output/" + session.getId());
         c.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
         c.qsim().setFlowCapFactor(sample);
@@ -83,7 +83,7 @@ public class MATSimScenarioGenerator {
         c.planCalcScore().setPerforming_utils_hr(0.);
 
 
-        Scenario sc = ScenarioUtils.createScenario(c);
-        return sc;
+//        Scenario sc = ScenarioUtils.createScenario(c);
+//        return sc;
     }
 }

@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.Point;
+import org.matsim.contrib.evacuationwebapp.evacuation.Session;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.SessionsManager;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlreadyExistsException;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
@@ -34,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class EvacuationController {
 
 
-    private final SessionsManager sm = new SessionsManager();
+    private final SessionsManager sm = new SessionsManager(() -> "http://overpass-api.de/api/");
 
     private long sessions = 0;
 
@@ -45,8 +46,9 @@ public class EvacuationController {
     public FeatureCollection evacuationArea(@RequestBody Feature[] message) throws Exception {
 
         String id = message[0].getProperty("sessionid");
+        Session s = new Session(id, message[0]);
         try {
-            this.sm.initializeNewSession(id, message[0]);
+            this.sm.initializeNewSession(s);
             return this.sm.getEvacuationAnalysisGrid(id);
         } catch (SessionAlreadyExistsException e) {
             log.warn(e);

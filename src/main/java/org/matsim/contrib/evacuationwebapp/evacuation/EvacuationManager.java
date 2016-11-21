@@ -11,13 +11,8 @@
 
 package org.matsim.contrib.evacuationwebapp.evacuation;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.google.inject.Inject;
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import de.westnordost.osmapi.map.data.BoundingBox;
-import de.westnordost.osmapi.map.handler.MapDataHandler;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.geojson.*;
@@ -25,18 +20,15 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.evacuationwebapp.utils.DefaultDemandGenerator;
 import org.matsim.contrib.evacuationwebapp.utils.Geometries;
 import org.matsim.contrib.evacuationwebapp.utils.MATSimScenarioGenerator;
-import org.matsim.contrib.evacuationwebapp.utils.Transformer;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
 import org.matsim.core.router.util.TravelDisutility;
-import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleUtils;
 
@@ -52,24 +44,27 @@ public class EvacuationManager {
 
     private static final int MAX_DEMAND = 25000;
 
-    private final Feature evacuationArea;
-    private final String session;
     private FeatureCollection grid;
-    private Transformer transformer;
+
 
     private LeastCostPathCalculator router;
-    private Scenario sc;
+    //    private Scenario sc;
     private Node safeNode;
     private Id<Link> sl;
+
+    @Inject
     private OSMNetwork osmNetwork;
+
+
+    @Inject
+    Session session;
+
+    @Inject
+    OSMParser parser;
 
 
     private boolean isInitialized = false;
 
-    public EvacuationManager(Feature evacuationArea, String session) {
-        this.session = session;
-        this.evacuationArea = evacuationArea;
-    }
 
     public synchronized void init() {
         if (isInitialized) {
@@ -77,53 +72,36 @@ public class EvacuationManager {
         }
 
 
-        Envelope e = Geometries.getEnvelope(evacuationArea);
-        String epsg = MGC.getUTMEPSGCodeForWGS84Coordinate(e.getMinX() + e.getWidth() / 2, e.getMinY() + e.getHeight() / 2);
-        this.transformer = new Transformer(epsg);
-        Envelope utmE = this.transformer.toUTM(e);
+//        Envelope e = Geometries.getEnvelope(evacuationArea);
+//        String epsg = MGC.getUTMEPSGCodeForWGS84Coordinate(e.getMinX() + e.getWidth() / 2, e.getMinY() + e.getHeight() / 2);
+//        this.transformer = new Transformer(epsg);
+//        Envelope utmE = this.transformer.toUTM(e);
 
 
-        int demand = Integer.parseInt((String) evacuationArea.getProperties().get("num"));
+        int demand = Integer.parseInt((String) session.getArea().getProperties().get("num"));
         double sample = 1;
         if (demand > MAX_DEMAND) {
             sample = (double) MAX_DEMAND / demand;
             demand = MAX_DEMAND;
         }
 
-        this.sc = MATSimScenarioGenerator.createScenario(sample, session);
 
+        MATSimScenarioGenerator.createScenario(sample, session);
 
-        BoundingBox boundingBox = new BoundingBox(e.getMinY(), e.getMinX(), e.getMaxY(), e.getMaxX());
-
-        this.osmNetwork = new OSMNetwork(utmE);
-
-
-        Injector injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(BoundingBox.class).toInstance(boundingBox);
-                bind(Transformer.class).toInstance(EvacuationManager.this.transformer);
-                bind(Network.class).toInstance(sc.getNetwork());
-                bind(MapDataHandler.class).to(OSMMapDataHandler.class);
-                bind(OSMNetwork.class).toInstance(EvacuationManager.this.osmNetwork);
-                bind(OSMWayFilter.class).to(OSMVehicularFilter.class);
-            }
-        });
-
-        OSMParser parser = injector.getInstance(OSMParser.class);
-
-        parser.run();
+        parser.run(this.osmNetwork);
 
         osmNetwork.createMATSimNetwork();
 
 
         this.sl = Id.createLinkId("safe");
-        com.vividsolutions.jts.geom.Polygon area = Geometries.toJTS((Polygon) evacuationArea.getGeometry());
-        com.vividsolutions.jts.geom.Polygon utmArea = this.transformer.toUTM(area);
+        com.vividsolutions.jts.geom.Polygon area = Geometries.toJTS((Polygon) session.getArea().getGeometry());
+        com.vividsolutions.jts.geom.Polygon utmArea = session.getTransformer().toUTM(area);
+
+        Scenario sc = this.session.getScenario();
 
         EvacuationNetworkGenerator netGen = new EvacuationNetworkGenerator(sc, utmArea, sl);
         netGen.run();
-        this.safeNode = this.sc.getNetwork().getLinks().get(sl).getToNode();
+        this.safeNode = sc.getNetwork().getLinks().get(sl).getToNode();
 
         osmNetwork.consolidate();
 
@@ -133,23 +111,23 @@ public class EvacuationManager {
         DefaultDemandGenerator.createDemand(sc, sl, demand);
 
 
-        Grid grid = new Grid(utmE, utmArea);
+        Grid grid = new Grid(session.getUtmE(), utmArea);
 
 
-        Controler c = new Controler(sc);
+        Controler cntr = new Controler(sc);
         EvacuationTimeObserver obs = new EvacuationTimeObserver(grid, sc);
-        c.getEvents().addHandler(obs);
+        cntr.getEvents().addHandler(obs);
 
         Level level = Logger.getRootLogger().getLevel();
         Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
-        c.run();
+        cntr.run();
         Logger.getRootLogger().setLevel(level);//restore log level
 
-        LeastCostPathCalculatorFactory fac = c.getLeastCostPathCalculatorFactory();
+        LeastCostPathCalculatorFactory fac = cntr.getLeastCostPathCalculatorFactory();
 
-        TravelDisutility travelCost = c.getTravelDisutilityFactory().createTravelDisutility(c.getLinkTravelTimes());
+        TravelDisutility travelCost = cntr.getTravelDisutilityFactory().createTravelDisutility(cntr.getLinkTravelTimes());
 
-        this.router = fac.createPathCalculator(sc.getNetwork(), travelCost, c.getLinkTravelTimes());
+        this.router = fac.createPathCalculator(sc.getNetwork(), travelCost, cntr.getLinkTravelTimes());
         obs.updateCellColors();
 
         this.grid = new FeatureCollection();
@@ -163,7 +141,7 @@ public class EvacuationManager {
             Feature ret = new Feature();
             List<LngLatAlt> l = new ArrayList<>();
             for (Coordinate coord : p.getExteriorRing().getCoordinates()) {
-                l.add(this.transformer.toGeographic(coord.x, coord.y));
+                l.add(this.session.getTransformer().toGeographic(coord.x, coord.y));
             }
             GeoJsonObject geo = new Polygon(l);
             ret.setGeometry(geo);
@@ -191,9 +169,9 @@ public class EvacuationManager {
 
     public synchronized FeatureCollection getRoute(LngLatAlt start) {
         init();
-        Coord coord = this.transformer.toUTM(start);
+        Coord coord = this.session.getTransformer().toUTM(start);
         Node from = this.osmNetwork.getClosestNode(coord);
-        Person p = sc.getPopulation().getFactory().createPerson(Id.createPersonId(0));
+        Person p = this.session.getScenario().getPopulation().getFactory().createPerson(Id.createPersonId(0));
         Vehicle v = VehicleUtils.getFactory().createVehicle(Id.createVehicleId(0), VehicleUtils.getDefaultVehicleType());
         FeatureCollection route = new FeatureCollection();
         try {

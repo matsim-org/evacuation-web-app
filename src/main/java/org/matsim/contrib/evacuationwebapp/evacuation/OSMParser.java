@@ -15,11 +15,9 @@ package org.matsim.contrib.evacuationwebapp.evacuation;
 import com.google.inject.Inject;
 import de.westnordost.osmapi.OsmConnection;
 import de.westnordost.osmapi.map.MapDataDao;
-import de.westnordost.osmapi.map.data.BoundingBox;
 import de.westnordost.osmapi.map.handler.MapDataHandler;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthConsumer;
-import org.matsim.contrib.evacuationwebapp.utils.Configuration;
 
 /**
  * Created by laemmel on 01/11/2016.
@@ -28,22 +26,26 @@ public class OSMParser {
 
 
     @Inject
-    BoundingBox boundingBox;
+    OSMAPIURLProvider aPIURL;
 
     @Inject
-    MapDataHandler myMapDataHandler;
+    Session session;
 
 
-    public void run() {
+    @Inject
+    OSMWayFilter filter;
+
+
+    public void run(OSMNetwork osmNetwork) {
         OAuthConsumer auth = new DefaultOAuthConsumer("null", "null");
-        OsmConnection osm = new OsmConnection(Configuration.OVERPASS_ADDRESS,
+        OsmConnection osm = new OsmConnection(aPIURL.getOSMAPIURL(),
                 "Agent Smith", auth);
-//        OsmConnection osm = new OsmConnection("http://localhost:9090/api/",
-//                "agent Smith", auth);
+
+        MapDataHandler myMapDataHandler = new OSMMapDataHandler(osmNetwork, filter);
 
         MapDataDao mapDao = new MapDataDao(osm);
 
 
-        mapDao.getMap(boundingBox, myMapDataHandler);
+        mapDao.getMap(session.getBoundingBox(), myMapDataHandler);
     }
 }

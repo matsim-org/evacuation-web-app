@@ -12,7 +12,6 @@
 package org.matsim.contrib.evacuationwebapp.evacuation;
 
 
-import com.google.inject.Inject;
 import de.westnordost.osmapi.map.data.BoundingBox;
 import de.westnordost.osmapi.map.data.Node;
 import de.westnordost.osmapi.map.data.Relation;
@@ -28,6 +27,8 @@ import org.matsim.core.utils.misc.Counter;
 public class OSMMapDataHandler implements MapDataHandler {
 
 
+    private final OSMNetwork network;
+    private final OSMWayFilter filter;
     private Counter nodesCounter = new Counter("Nodes downloaded: ");
     private Counter waysCounter = new Counter("Ways downloaded: ");
 
@@ -35,11 +36,12 @@ public class OSMMapDataHandler implements MapDataHandler {
 
     private static final Logger log = Logger.getLogger(OSMMapDataHandler.class);
 
-    @Inject
-    private OSMNetwork network;
 
-    @Inject
-    OSMWayFilter filter;
+    public OSMMapDataHandler(OSMNetwork network, OSMWayFilter filter) {
+        this.network = network;
+        this.filter = filter;
+    }
+
 
     @Override
     public void handle(BoundingBox boundingBox) {

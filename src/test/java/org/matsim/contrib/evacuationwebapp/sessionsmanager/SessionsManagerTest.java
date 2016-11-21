@@ -15,6 +15,7 @@ import org.geojson.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.matsim.contrib.evacuationwebapp.evacuation.Session;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlreadyExistsException;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
 import org.matsim.contrib.evacuationwebapp.utils.Configuration;
@@ -42,7 +43,7 @@ public class SessionsManagerTest {
 
     @Before
     public void intialize() {
-        this.m = new SessionsManager();
+        this.m = new SessionsManager(() -> "http://localhost:9090/api/");
 
         this.ft1 = new Feature();
         List<LngLatAlt> lngLatAlt = new ArrayList<>();
@@ -69,26 +70,31 @@ public class SessionsManagerTest {
 
     @Test(expected = UnknownSessionException.class)
     public void unknownClientGridTest() {
-        this.m.initializeNewSession("client1", this.ft1);
+        Session s = new Session("client1", this.ft1);
+        this.m.initializeNewSession(s);
         this.m.getEvacuationAnalysisGrid("client2");
     }
 
     @Test(expected = UnknownSessionException.class)
     public void unknownClientRouteTest() {
-        this.m.initializeNewSession("client1", this.ft1);
+        Session s = new Session("client1", this.ft1);
+        this.m.initializeNewSession(s);
         this.m.getEvacuationRoute("client2", null);
     }
 
     @Test(expected = UnknownSessionException.class)
     public void unknownClientDisconnectTest() {
-        this.m.initializeNewSession("client1", this.ft1);
+        Session s = new Session("client1", this.ft1);
+        this.m.initializeNewSession(s);
         this.m.disconnect("client2");
     }
 
     @Test(expected = SessionAlreadyExistsException.class)
     public void sessionAlreadyExistsExceptionTest() {
-        this.m.initializeNewSession("client1", this.ft1);
-        this.m.initializeNewSession("client1", this.ft1);
+        Session s = new Session("client1", this.ft1);
+        this.m.initializeNewSession(s);
+        Session s2 = new Session("client1", this.ft1);
+        this.m.initializeNewSession(s2);
     }
 
 //    @Test(timeout = 120 * 1000) //timeout 120s
@@ -115,7 +121,8 @@ public class SessionsManagerTest {
 
     @Test(timeout = 60 * 1000) //timeout 60s
     public void runParallelQueries() {
-        this.m.initializeNewSession("client", this.ft1);
+        Session s = new Session("client", this.ft1);
+        this.m.initializeNewSession(s);
 
         Queue<Thread> threads = new LinkedList<>();
 
