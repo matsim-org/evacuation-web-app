@@ -14,12 +14,10 @@ package org.matsim.contrib.evacuationwebapp.sessionsmanager;
 import org.geojson.*;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.contrib.evacuationwebapp.evacuation.Session;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlreadyExistsException;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
-import org.matsim.contrib.evacuationwebapp.utils.Configuration;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -38,9 +36,32 @@ public class SessionsManagerTest {
     private SessionsManager m;
     private Feature ft1;
 
-    @BeforeClass
-    public static void setOverpassAddressToLocal() {
-        Configuration.OVERPASS_ADDRESS = "http://localhost:9090/api/";
+    private static void validateRoute(FeatureCollection route) {
+        assertThat(route.getFeatures().size(), is(2));
+
+        Double prop = route.getFeatures().get(1).getProperty("time");
+        assertThat(prop, is(69.52951176470589));
+    }
+
+    private static void validateGrid(FeatureCollection grid) {
+        assertThat(grid.getFeatures().size(), is(3));
+
+        {
+            Feature f = grid.getFeatures().get(0);
+            Object color = f.getProperty("color");
+            assertThat(color.toString(), is("purple"));
+        }
+        {
+            Feature f = grid.getFeatures().get(1);
+            Object color = f.getProperty("color");
+            assertThat(color.toString(), is("purple"));
+        }
+        {
+            Feature f = grid.getFeatures().get(2);
+            Object color = f.getProperty("color");
+            assertThat(color.toString(), is("green"));
+        }
+
     }
 
     @Before
@@ -160,34 +181,6 @@ public class SessionsManagerTest {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }
-
-    }
-
-    private static void validateRoute(FeatureCollection route) {
-        assertThat(route.getFeatures().size(), is(2));
-
-        Double prop = route.getFeatures().get(1).getProperty("time");
-        assertThat(prop, is(69.52951176470589));
-    }
-
-    private static void validateGrid(FeatureCollection grid) {
-        assertThat(grid.getFeatures().size(), is(3));
-
-        {
-            Feature f = grid.getFeatures().get(0);
-            Object color = f.getProperty("color");
-            assertThat(color.toString(), is("purple"));
-        }
-        {
-            Feature f = grid.getFeatures().get(1);
-            Object color = f.getProperty("color");
-            assertThat(color.toString(), is("purple"));
-        }
-        {
-            Feature f = grid.getFeatures().get(2);
-            Object color = f.getProperty("color");
-            assertThat(color.toString(), is("green"));
         }
 
     }
