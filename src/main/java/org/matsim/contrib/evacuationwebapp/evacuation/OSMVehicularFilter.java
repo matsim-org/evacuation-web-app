@@ -42,8 +42,8 @@ public class OSMVehicularFilter implements OSMWayFilter {
         highwaysettingMap.put("minor", new Highwaysetting(1, 20 / 3.6, 600, false));
         highwaysettingMap.put("residential", new Highwaysetting(1, 15 / 3.6, 600, false));
         highwaysettingMap.put("living_street", new Highwaysetting(1, 15 / 3.6, 600, false));
+        highwaysettingMap.put("service", new Highwaysetting(1, 15 / 3.6, 300, false));
         highwaysettingMap.put("unclassified", new Highwaysetting(1, 45 / 3.6, 600, false));
-
 
     }
 
@@ -71,6 +71,14 @@ public class OSMVehicularFilter implements OSMWayFilter {
             if (way.getTags().get("lanes") != null) {
                 double lanes = Integer.parseInt(way.getTags().get("lanes"));
                 link.setNumberOfLanes(lanes);
+            }
+        } catch (NumberFormatException e) {
+            log.warn(e);
+        }
+        try {
+            if (way.getTags().get("maxspeed") != null) {
+                double freespeed = Integer.parseInt(way.getTags().get("maxspeed"));
+                link.setFreespeed(freespeed / 3.6);
             }
         } catch (NumberFormatException e) {
             log.warn(e);
