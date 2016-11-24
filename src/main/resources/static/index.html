@@ -34,6 +34,8 @@
     <link href="main.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+    <script src="http://spin.js.org/spin.min.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
     <meta charset='utf-8'/>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
@@ -120,6 +122,15 @@
             opacity: 0.7;
         }
 
+        #blackOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(128, 128, 128, 0.5);
+        }
+
     </style>
 </head>
 <body>
@@ -130,7 +141,17 @@
 
 <div id='map'></div>
 
-
+<div id="blackOverlay">
+    <!--<div class="w3-display-middle" >-->
+    <!--<img src="1.png" style="width:100%">-->
+    <!--</div>-->
+    <div class="w3-display-topmiddle w3-margin w3-container w3-center w3-white w3-round">
+        <h1>We are processing your query...</h1>
+        <p>
+            Do not reload page! Results will be displayed automatically when ready.
+        </p>
+    </div>
+</div>
 
 
 <div id="main-content" class="container">
@@ -147,8 +168,60 @@
 </div>
 
 
-
 <script>
+
+    hide(document.getElementById('blackOverlay'));
+    //        var elements = document.querySelectorAll('#blackOverlay');
+    //        show(elements, 'inline-block');
+
+
+    function hide(elements) {
+        elements = elements.length ? elements : [elements];
+        for (var index = 0; index < elements.length; index++) {
+            elements[index].style.display = 'none';
+        }
+    }
+
+    function show(elements, specifiedDisplay) {
+        var computedDisplay, element, index;
+
+        elements = elements.length ? elements : [elements];
+        for (index = 0; index < elements.length; index++) {
+            element = elements[index];
+
+            // Remove the element's inline display styling
+            element.style.display = '';
+            computedDisplay = window.getComputedStyle(element, null).getPropertyValue('display');
+
+            if (computedDisplay === 'none') {
+                element.style.display = specifiedDisplay || 'block';
+            }
+        }
+        var opts = {
+            lines: 13 // The number of lines to draw
+            , length: 56 // The length of each line
+            , width: 14 // The line thickness
+            , radius: 37 // The radius of the inner circle
+            , scale: 1 // Scales overall size of the spinner
+            , corners: 1 // Corner roundness (0..1)
+            , color: '#000' // #rgb or #rrggbb or array of colors
+            , opacity: 0.25 // Opacity of the lines
+            , rotate: 0 // The rotation offset
+            , direction: 1 // 1: clockwise, -1: counterclockwise
+            , speed: 1 // Rounds per second
+            , trail: 60 // Afterglow percentage
+            , fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+            , zIndex: 2e9 // The z-index (defaults to 2000000000)
+            , className: 'spinner' // The CSS class to assign to the spinner
+            , top: '50%' // Top position relative to parent
+            , left: '50%' // Left position relative to parent
+            , shadow: true // Whether to render a shadow
+            , hwaccel: true // Whether to use hardware acceleration
+            , position: 'absolute' // Element positioning
+        };
+        var spinner = new Spinner(opts).spin();
+        elements[0].appendChild(spinner.el)
+    }
 
     var hexGridFeatures;
     var stopMarker;
@@ -178,17 +251,36 @@
     }
 
 
-    var map = L.map('map').setView([40.782028, -73.965626], 18);
+    //    var southWest = L.latLng(40.712, -74.227),
+    //        northEast = L.latLng(40.774, -74.125),
+    //        bounds = L.latLngBounds(southWest, northEast);
 
-    var Stamen_Toner = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.{ext}', {
-        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; ' +
-        'Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &mdash; Simulation powered by <a href="http://matsim.org">MATSim</a>',
+
+    //    var map = L.map('map').setView([40.782028, -73.965626], 14); //Manhattan
+
+    var map = L.map('map', {
+        zoomControl: false
+    }).setView([52.495251, 13.395424], 14);  //Berlin
+
+
+    //    var Stamen_Toner = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.{ext}', {
+    //        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; ' +
+    //        'Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &mdash; Simulation powered by <a href="http://matsim.org">MATSim</a>',
+    //        subdomains: 'abcd',
+    //        minZoom: 0,
+    //        maxZoom: 20,
+    ////        maxBounds: bounds,
+    //        ext: 'png'
+    //    });
+
+    var MapBox = L.tileLayer('http://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution: 'Imagery from <a href="http://mapbox.com/about/maps/">MapBox</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>&mdash; Simulation powered by <a href="http://matsim.org">MATSim</a>',
         subdomains: 'abcd',
-        minZoom: 0,
-        maxZoom: 20,
-        ext: 'png'
+        id: 'mapbox.streets',
+        accessToken: 'pk.eyJ1IjoiZ3JlZ29ybGFlbW1lbCIsImEiOiJjaW92N3FjNzgwMDVld2RranFibGV3NjNxIn0.OqCU0VqbtWa_90fz11UArw'
     });
-    Stamen_Toner.addTo(map);
+
+    MapBox.addTo(map);
 
     var drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
@@ -201,17 +293,20 @@
 
 
     function addControls() {
-
+        L.control.scale({
+            position: 'bottomright',
+            maxWidth: 200
+        }).addTo(map);
 
         var options = {
             position: 'topleft',
             draw: {
                 polyline: false,
                 polygon: {
-                    allowIntersection: false, // Restricts shapes to simple polygons
+                    allowIntersection: false,
                     drawError: {
-                        color: '#e1e100', // Color the shape will turn when intersects
-                        message: '<strong>Warning!<strong> Evacuation area must not intersect itself!' // Message that will show when intersect
+                        color: '#e1e100',
+                        message: '<strong>Warning!<strong> Evacuation area must not intersect itself!'
                     },
                     shapeOptions: {
                         color: '#ff1111'
@@ -227,7 +322,6 @@
             }
         };
 
-        // Initialize the draw control and pass it the FeatureGroup of editable layers
         var drawControl = new L.Control.Draw(options);
         map.addControl(drawControl);
     }
@@ -239,7 +333,6 @@
         if (type === 'marker') {
             // Do marker specific actions
         }
-        // Do whatever else you need to. (save to db; add to map etc)
         drawnItems.addLayer(layer);
     });
 
@@ -291,7 +384,7 @@
                         alert("Could not find evacuation route for given origin, please choose a different one!");
                     }
 
-                })
+                });
                 stompClient.send('/app/session', {}, "msg");
             });
 
@@ -327,6 +420,11 @@
 
         stompClient.send("/app/evac", {}, JSON.stringify([data]));
         setSubmitted(true);
+
+        var elements = document.querySelectorAll('#blackOverlay');
+        show(elements, 'inline-block');
+
+
     }
 
     var routeFeature;
@@ -343,7 +441,7 @@
                 style: styleRoute
             }).addTo(routeLayer);
 
-            var ft = route.features[route.features.length - 1]
+            var ft = route.features[route.features.length - 1];
             var coords1 = ft.geometry.coordinates[ft.geometry.coordinates.length - 1];
 
             var latLng1 = new L.LatLng(coords1[1], coords1[0]);
@@ -386,13 +484,11 @@
     function onEachFeature(feature, layer) {
         layer.on({
             mouseover: highlightFeature,
-            mouseout: resetHighlight,
-//            click: zoomToFeature
+            mouseout: resetHighlight
         });
     }
 
     function resetHighlight(e) {
-//        geojson.resetStyle(e.target);
         var layer = e.target;
         layer.setStyle({
             weight: 2,
@@ -404,9 +500,6 @@
         info.update();
     }
 
-    //    function zoomToFeature(e) {
-    //        map.fitBounds(e.target.getBounds());
-    //    }
     function highlightFeature(e) {
         var layer = e.target;
 
@@ -414,7 +507,7 @@
             weight: 5,
             color: '#000',
             dashArray: '3',
-            fillOpacity: 0.9
+            fillOpacity: 0.5
         });
 
         if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
@@ -427,7 +520,7 @@
 
 
     function showGrid(message) {
-
+        hide(document.getElementById('blackOverlay'));
         try {
 
             hexGridFeatures = L.geoJson(message, {
