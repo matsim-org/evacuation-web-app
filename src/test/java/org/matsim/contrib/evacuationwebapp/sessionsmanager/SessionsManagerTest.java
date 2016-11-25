@@ -32,29 +32,31 @@ import static org.hamcrest.core.Is.is;
  * Created by laemmel on 17/11/2016.
  */
 public class SessionsManagerTest {
+    private volatile AssertionError exc;
 
     private SessionsManager m;
     private Feature ft1;
 
-    private static void validateRoute(FeatureCollection route) {
-        assertThat(route.getFeatures().size(), is(2));
 
-        Double prop = route.getFeatures().get(1).getProperty("time");
-        assertThat(prop, is(69.52951176470589));
+    private void validateRoute(FeatureCollection route) throws AssertionError {
+        assertThat(route.getFeatures().size(), is(1));
+
+        Double prop = route.getFeatures().get(0).getProperty("time");
+        assertThat(prop, is(34.0001));
     }
 
-    private static void validateGrid(FeatureCollection grid) {
+    private void validateGrid(FeatureCollection grid) throws AssertionError {
         assertThat(grid.getFeatures().size(), is(3));
 
         {
             Feature f = grid.getFeatures().get(0);
             Object color = f.getProperty("color");
-            assertThat(color.toString(), is("purple"));
+            assertThat(color.toString(), is("green"));
         }
         {
             Feature f = grid.getFeatures().get(1);
             Object color = f.getProperty("color");
-            assertThat(color.toString(), is("purple"));
+            assertThat(color.toString(), is("lime"));
         }
         {
             Feature f = grid.getFeatures().get(2);
@@ -130,7 +132,6 @@ public class SessionsManagerTest {
         for (int i = 0; i < 4; i++) {
             FeatureCollection grid = this.m.getEvacuationAnalysisGrid("client" + i);
             assertThat(grid, notNullValue());
-//            validateGrid(grid);
         }
         this.m.disconnect("client0");
 
@@ -138,7 +139,6 @@ public class SessionsManagerTest {
             LngLatAlt ll = new LngLatAlt(-74.03363892451813, 40.753928071164495);
             FeatureCollection route = this.m.getEvacuationRoute("client" + i, ll);
             assertThat(route, notNullValue());
-//            validateRoute(route);
         }
 
         for (int i = 1; i < 4; i++) {
@@ -160,26 +160,30 @@ public class SessionsManagerTest {
                 public void run() {
                     for (int i = 0; i < 10000; i++) {
                         FeatureCollection grid = SessionsManagerTest.this.m.getEvacuationAnalysisGrid("client");
-                        validateGrid(grid);
-
                         LngLatAlt ll = new LngLatAlt(-74.03363892451813, 40.753928071164495);
                         FeatureCollection route = SessionsManagerTest.this.m.getEvacuationRoute("client", ll);
-                        validateRoute(route);
+                        try {
+                            validateGrid(grid);
+                            validateRoute(route);
+                        } catch (AssertionError e) {
+                            exc = e;
+                        }
                     }
-
                 }
             };
             t.start();
             threads.add(t);
-
         }
-
         while (threads.peek() != null) {
             Thread t = threads.poll();
             try {
                 t.join();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            } finally {
+                if (exc != null) {
+                    throw exc;
+                }
             }
         }
 
