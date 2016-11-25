@@ -106,7 +106,7 @@ public class EvacuationManager {
 
 
         Controler cntr = new Controler(sc);
-        EvacuationTimeObserver obs = new EvacuationTimeObserver(grid, sc);
+        EvacuationTimeObserver obs = new EvacuationTimeObserver(grid, sc, sample);
         cntr.getEvents().addHandler(obs);
 
 //        Level level = Logger.getRootLogger().getLevel();
@@ -139,14 +139,14 @@ public class EvacuationManager {
             ret.setProperty("color", cell.c.toString());
             ret.setProperty("time", cell.time);
             if (first) {
-                double maxTT = obs.getMAXTT();
-                ret.setProperty("green", maxTT * 0.3);
-                ret.setProperty("lime", maxTT * 0.4);
-                ret.setProperty("yellow", maxTT * 0.5);
-                ret.setProperty("orange", maxTT * 0.6);
-                ret.setProperty("red", maxTT * 0.7);
-                ret.setProperty("fuchsia", maxTT * 0.8);
-                ret.setProperty("purple", maxTT);
+                List<Double> percentils = obs.getPercentiles();
+                ret.setProperty("green", percentils.get(0));
+                ret.setProperty("lime", percentils.get(1));
+                ret.setProperty("yellow", percentils.get(2));
+                ret.setProperty("orange", percentils.get(3));
+                ret.setProperty("red", percentils.get(4));
+                ret.setProperty("fuchsia", percentils.get(5));
+                ret.setProperty("purple", percentils.get(6));
                 first = false;
             }
 

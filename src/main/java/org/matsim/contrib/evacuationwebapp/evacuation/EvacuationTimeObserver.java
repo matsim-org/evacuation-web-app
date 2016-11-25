@@ -20,9 +20,7 @@ import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by laemmel on 02/11/2016.
@@ -30,17 +28,20 @@ import java.util.Set;
 public class EvacuationTimeObserver implements PersonDepartureEventHandler, PersonArrivalEventHandler {
 
 
+    private static final int NR_DEP = 10;
     private final Map<Id<Person>, PersonDepartureEvent> dep = new HashMap<>();
     private final Map<Grid.Cell, TTInfo> tt = new HashMap<>();
     private final Grid grid;
     private final Scenario sc;
-    private double maxTT;
+    private final List<Double> percentiles = new ArrayList<>();
+    private int cntCutoff;
 
 //    private double maxTT = 0;
 
-    public EvacuationTimeObserver(Grid grid, Scenario sc) {
+    public EvacuationTimeObserver(Grid grid, Scenario sc, double sample) {
         this.grid = grid;
         this.sc = sc;
+        this.cntCutoff = (int) Math.max(1, NR_DEP * sample + 0.5);
     }
 
     @Override
@@ -75,47 +76,59 @@ public class EvacuationTimeObserver implements PersonDepartureEventHandler, Pers
 
     public void updateCellColors() {
         Set<Map.Entry<Grid.Cell, TTInfo>> es = tt.entrySet();
-        double maxTT = 0;
+        List<Double> tts = new ArrayList<>();
         for (Map.Entry<Grid.Cell, TTInfo> entry : es) {
-            if (entry.getValue().tt > maxTT) {
-                maxTT = entry.getValue().tt;
-            }
+            tts.add(entry.getValue().tt);
 
         }
-        this.maxTT = maxTT;
+        Collections.sort(tts);
+        int sz = tts.size();
+
+        this.percentiles.add(tts.get((int) (sz * 0.3 + 0.5)));
+        this.percentiles.add(tts.get((int) (sz * 0.5 + 0.5)));
+        this.percentiles.add(tts.get((int) (sz * 0.6 + 0.5)));
+        this.percentiles.add(tts.get((int) (sz * 0.7 + 0.5)));
+        this.percentiles.add(tts.get((int) (sz * 0.8 + 0.5)));
+        this.percentiles.add(tts.get((int) (sz * 0.9 + 0.5)));
+        this.percentiles.add(tts.get((int) (sz - 1)));
+
 
         for (Map.Entry<Grid.Cell, TTInfo> entry : es) {
-            double rel = entry.getValue().tt / maxTT;
-            if (rel < 0.3) {
+            double tt = entry.getValue().tt;
+            if (tt <= this.percentiles.get(0)) {
                 entry.getKey().c = Grid.CellColor.green;
-            } else if (rel < 0.4) {
+            } else if (tt <= this.percentiles.get(1)) {
                 entry.getKey().c = Grid.CellColor.lime;
-            } else if (rel < 0.5) {
+            } else if (tt <= this.percentiles.get(2)) {
                 entry.getKey().c = Grid.CellColor.yellow;
-            } else if (rel < 0.6) {
+            } else if (tt <= this.percentiles.get(3)) {
                 entry.getKey().c = Grid.CellColor.orange;
-            } else if (rel < 0.7) {
+            } else if (tt <= this.percentiles.get(4)) {
                 entry.getKey().c = Grid.CellColor.red;
-            } else if (rel < 0.8) {
+            } else if (tt <= this.percentiles.get(5)) {
                 entry.getKey().c = Grid.CellColor.fuchsia;
             } else {
                 entry.getKey().c = Grid.CellColor.purple;
             }
-            entry.getKey().time = entry.getValue().tt;
+            entry.getKey().time = tt;
+
+
         }
     }
 
-    public double getMAXTT() {
-        return maxTT;
+    public List<Double> getPercentiles() {
+        return this.percentiles;
     }
 
     private final class TTInfo {
-        int cnt;
+        int cnt = 0;
         double tt;
 
         void updateTT(double time) {
-            tt = ((double) cnt) / (1 + cnt) * tt + (1. / (1 + cnt)) * time;
-            cnt++;
+            if (cnt < EvacuationTimeObserver.this.cntCutoff) {
+                tt = ((double) cnt) / (1 + cnt) * tt + (1. / (1 + cnt)) * time;
+                cnt++;
+            }
         }
     }
 }
