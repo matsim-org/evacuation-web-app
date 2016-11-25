@@ -84,12 +84,12 @@ public class EvacuationTimeObserver implements PersonDepartureEventHandler, Pers
         Collections.sort(tts);
         int sz = tts.size();
 
-        this.percentiles.add(tts.get((int) (sz * 0.3 + 0.5)));
-        this.percentiles.add(tts.get((int) (sz * 0.5 + 0.5)));
-        this.percentiles.add(tts.get((int) (sz * 0.6 + 0.5)));
-        this.percentiles.add(tts.get((int) (sz * 0.7 + 0.5)));
-        this.percentiles.add(tts.get((int) (sz * 0.8 + 0.5)));
-        this.percentiles.add(tts.get((int) (sz * 0.9 + 0.5)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.3 + 0.5), sz - 1)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.5 + 0.5), sz - 1)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.6 + 0.5), sz - 1)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.7 + 0.5), sz - 1)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.8 + 0.5), sz - 1)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.9 + 0.5), sz - 1)));
         this.percentiles.add(tts.get((int) (sz - 1)));
 
 
