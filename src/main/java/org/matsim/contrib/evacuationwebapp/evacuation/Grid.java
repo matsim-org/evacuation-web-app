@@ -36,41 +36,44 @@ import static org.codetome.hexameter.core.api.HexagonalGridLayout.RECTANGULAR;
  */
 public class Grid {
 
-    public enum CellColor {
-        green, lime, orange, red, fuchsia, purple, yellow, white
-    }
-
-    private static final double RADIUS = 150;
-
+    private final double radius;
     private final Logger log = Logger.getLogger(Grid.class);
-
     private final Envelope utmE;
     private final Polygon utmArea;
-
     private final List<Polygon> polygons = new ArrayList<>();
     private QuadTree<Cell> quad;
-
     public Grid(Envelope utmEnvelope, Polygon utmArea) {
         this.utmE = utmEnvelope;
         this.utmArea = utmArea;
+
+        double mxL = Math.min(utmEnvelope.getHeight(), utmEnvelope.getWidth());
+        if (mxL <= 10000) {
+            radius = 150;
+        } else if (mxL <= 20000) {
+            radius = 300;
+        } else if (mxL <= 50000) {
+            radius = 1000;
+        } else {
+            radius = 2000;
+        }
         init();
     }
 
     private void init() {
 
         log.info("initializing hex grid.");
-        this.quad = new QuadTree<Cell>(utmE.getMinX() - 10000, utmE.getMinY() - 10000, utmE.getMaxX() + 10000, utmE.getMaxY() + 10000);
+        this.quad = new QuadTree<Cell>(utmE.getMinX() - utmE.getWidth(), utmE.getMinY() - utmE.getHeight(), utmE.getMaxX() + utmE.getWidth(), utmE.getMaxY() + utmE.getHeight());
 
 
-        int gridHeight = (int) (utmE.getHeight() / (3. / 4 * RADIUS * 2) + 0.5) + 2;
-        int gridWidth = (int) (utmE.getWidth() / (3. / 4 * RADIUS * 2) + 0.5) + 2;
+        int gridHeight = (int) (utmE.getHeight() / (3. / 4 * radius * 2) + 0.5) + 2;
+        int gridWidth = (int) (utmE.getWidth() / (3. / 4 * radius * 2) + 0.5) + 2;
 
         HexagonalGridBuilder builder = new HexagonalGridBuilder()
                 .setGridHeight(gridHeight)
                 .setGridWidth(gridWidth)
                 .setGridLayout(RECTANGULAR)
                 .setOrientation(FLAT_TOP)
-                .setRadius(RADIUS);
+                .setRadius(radius);
         HexagonalGrid grid = builder.build();
 
 
@@ -85,8 +88,8 @@ public class Grid {
 
                 for (Object point : hexagon.getPoints()) {
                     Point p = (Point) point;
-                    double x = p.getCoordinateX() + utmE.getMinX() - RADIUS / 2;
-                    double y = p.getCoordinateY() + utmE.getMinY() - RADIUS / 2;
+                    double x = p.getCoordinateX() + utmE.getMinX() - radius / 2;
+                    double y = p.getCoordinateY() + utmE.getMinY() - radius / 2;
                     coords[idx++] = new Coordinate(x, y);
                 }
                 coords[idx] = new Coordinate(coords[0]);
@@ -104,13 +107,16 @@ public class Grid {
 
     }
 
-
     public Cell getClosestCell(double x, double y) {
         return this.quad.getClosest(x, y);
     }
 
     public Collection<Cell> getCells() {
         return this.quad.values();
+    }
+
+    public enum CellColor {
+        green, lime, orange, red, fuchsia, purple, yellow, white
     }
 
     static final class Cell {
