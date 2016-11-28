@@ -158,7 +158,7 @@ public class SessionsManagerTest {
             Thread t = new Thread() {
                 @Override
                 public void run() {
-                    for (int i = 0; i < 10000; i++) {
+                    for (int i = 0; i < 100; i++) {
                         FeatureCollection grid = SessionsManagerTest.this.m.getEvacuationAnalysisGrid("client");
                         LngLatAlt ll = new LngLatAlt(-74.03363892451813, 40.753928071164495);
                         FeatureCollection route = SessionsManagerTest.this.m.getEvacuationRoute("client", ll);
