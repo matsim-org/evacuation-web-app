@@ -51,12 +51,12 @@ public class SessionsManagerTest {
         {
             Feature f = grid.getFeatures().get(0);
             Object color = f.getProperty("color");
-            assertThat(color.toString(), is("green"));
+            assertThat(color.toString(), is("lime"));
         }
         {
             Feature f = grid.getFeatures().get(1);
             Object color = f.getProperty("color");
-            assertThat(color.toString(), is("lime"));
+            assertThat(color.toString(), is("orange"));
         }
         {
             Feature f = grid.getFeatures().get(2);

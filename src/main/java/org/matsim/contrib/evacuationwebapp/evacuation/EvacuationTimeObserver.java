@@ -19,6 +19,7 @@ import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.evacuationwebapp.utils.Median;
 
 import java.util.*;
 
@@ -47,6 +48,12 @@ public class EvacuationTimeObserver implements PersonDepartureEventHandler, Pers
     @Override
     public void handleEvent(PersonArrivalEvent event) {
         PersonDepartureEvent dEvent = dep.remove(event.getPersonId());
+        double travelTime = event.getTime() - dEvent.getTime();
+        if (travelTime <= 0) {
+            return;
+        }
+
+
         Link link = this.sc.getNetwork().getLinks().get(dEvent.getLinkId());
         Grid.Cell cell = grid.getClosestCell(link.getCoord().getX(), link.getCoord().getY());
         TTInfo t = tt.get(cell);
@@ -54,7 +61,7 @@ public class EvacuationTimeObserver implements PersonDepartureEventHandler, Pers
             t = new TTInfo();
             tt.put(cell, t);
         }
-        t.updateTT(event.getTime() - dEvent.getTime());
+        t.updateTT(travelTime);
 
 //        if (t.tt > maxTT) {
 //            maxTT = t.tt;
@@ -78,23 +85,23 @@ public class EvacuationTimeObserver implements PersonDepartureEventHandler, Pers
         Set<Map.Entry<Grid.Cell, TTInfo>> es = tt.entrySet();
         List<Double> tts = new ArrayList<>();
         for (Map.Entry<Grid.Cell, TTInfo> entry : es) {
-            tts.add(entry.getValue().tt);
+            tts.add(entry.getValue().getTT());
 
         }
         Collections.sort(tts);
         int sz = tts.size();
 
-        this.percentiles.add(tts.get((int) Math.min((sz * 0.3 + 0.5), sz - 1)));
-        this.percentiles.add(tts.get((int) Math.min((sz * 0.5 + 0.5), sz - 1)));
-        this.percentiles.add(tts.get((int) Math.min((sz * 0.6 + 0.5), sz - 1)));
-        this.percentiles.add(tts.get((int) Math.min((sz * 0.7 + 0.5), sz - 1)));
-        this.percentiles.add(tts.get((int) Math.min((sz * 0.8 + 0.5), sz - 1)));
-        this.percentiles.add(tts.get((int) Math.min((sz * 0.9 + 0.5), sz - 1)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.1 + 0.5), sz - 1)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.25 + 0.5), sz - 1)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.4 + 0.5), sz - 1)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.55 + 0.5), sz - 1)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.70 + 0.5), sz - 1)));
+        this.percentiles.add(tts.get((int) Math.min((sz * 0.85 + 0.5), sz - 1)));
         this.percentiles.add(tts.get((int) (sz - 1)));
 
 
         for (Map.Entry<Grid.Cell, TTInfo> entry : es) {
-            double tt = entry.getValue().tt;
+            double tt = entry.getValue().getTT();
             if (tt <= this.percentiles.get(0)) {
                 entry.getKey().c = Grid.CellColor.green;
             } else if (tt <= this.percentiles.get(1)) {
@@ -124,11 +131,21 @@ public class EvacuationTimeObserver implements PersonDepartureEventHandler, Pers
         int cnt = 0;
         double tt;
 
+        Median m = new Median();
+
         void updateTT(double time) {
-            if (cnt < EvacuationTimeObserver.this.cntCutoff) {
-                tt = ((double) cnt) / (1 + cnt) * tt + (1. / (1 + cnt)) * time;
-                cnt++;
-            }
+//            if (cnt < EvacuationTimeObserver.this.cntCutoff) {
+//                tt = ((double) cnt) / (1 + cnt) * tt + (1. / (1 + cnt)) * time;
+//                cnt++;
+//            }
+
+
+            m.addValue(time);
+        }
+
+        double getTT() {
+            return m.getMedian();
+//            return tt;
         }
     }
 }

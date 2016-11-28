@@ -49,6 +49,7 @@ public class MATSimScenarioGenerator {
         c.strategy().addParam("ModuleProbability_2", "0.9");
 
         c.travelTimeCalculator().setTravelTimeCalculatorType("TravelTimeCalculatorHashMap");
+        c.travelTimeCalculator().setTravelTimeAggregatorType("experimental_LastMile");
 
         c.controler().setDumpDataAtEnd(false);
         c.controler().setWriteEventsInterval(0);
