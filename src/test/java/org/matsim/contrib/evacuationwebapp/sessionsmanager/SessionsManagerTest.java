@@ -43,7 +43,7 @@ public class SessionsManagerTest {
         assertThat(route.getFeatures().size(), is(1));
 
         Double prop = route.getFeatures().get(0).getProperty("time");
-        assertThat(prop, is(34.0001));
+        assertThat(prop, is(40.0001));
     }
 
     private void validateGrid(FeatureCollection grid) throws AssertionError {
