@@ -27,10 +27,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 /**
  * Created by laemmel on 17/11/2016.
@@ -41,9 +38,12 @@ public class SessionsManager {
 
     private final Map<String, Worker> workers = new ConcurrentHashMap<>();
     private final Queue<Thread> threads = new LinkedList<>();
+    private final long keepAlive;
 
-    public SessionsManager(OSMAPIURLProvider osmURL) {
+
+    public SessionsManager(OSMAPIURLProvider osmURL, long keepAlive) {
         this.osmURL = osmURL;
+        this.keepAlive = keepAlive;
         Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
     }
 
@@ -82,6 +82,7 @@ public class SessionsManager {
     }
 
     public void disconnect(String sessionId) {
+        //TODO remove and join thread [GL Nov '16]
         Worker w = workers.remove(sessionId);
         if (w == null) {
             throw new UnknownSessionException("A session with ID: " + sessionId + " does not exist.");
@@ -188,7 +189,14 @@ public class SessionsManager {
             isRunning = true;
             while (isRunning(true)) {
                 try {
-                    Request r = requesQueue.take();
+                    Request r = requesQueue.poll(SessionsManager.this.keepAlive, TimeUnit.SECONDS);
+
+                    if (r == null) {
+                        //TODO remove worker; remove and join thread! [GL Nov '16]
+                        cleanUp();
+                        continue;
+                    }
+
                     switch (r.getRequestType()) {
                         case Grid:
                             FeatureCollection grid = this.em.getGrid();
@@ -198,11 +206,7 @@ public class SessionsManager {
                             r.setResponse(this.em.getRoute(r.getCoord()));
                             break;
                         case Shutdown:
-                            isRunning(false);
-                            while (requesQueue.peek() != null) {
-                                Request rr = requesQueue.poll();
-                                rr.setResponse(null);
-                            }
+                            cleanUp();
                             r.setResponse(null);
                             break;
                         default:
@@ -217,6 +221,14 @@ public class SessionsManager {
             }
 
 
+        }
+
+        private void cleanUp() {
+            isRunning(false);
+            while (requesQueue.peek() != null) {
+                Request rr = requesQueue.poll();
+                rr.setResponse(null);
+            }
         }
 
         private synchronized boolean isRunning(boolean keepRunning) {

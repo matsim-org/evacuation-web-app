@@ -27,6 +27,7 @@ import java.util.Queue;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 
 /**
  * Created by laemmel on 17/11/2016.
@@ -68,7 +69,7 @@ public class SessionsManagerTest {
 
     @Before
     public void intialize() {
-        this.m = new SessionsManager(() -> "http://localhost:9090/api/");
+        this.m = new SessionsManager(() -> "http://localhost:9090/api/", 5);
 
         this.ft1 = new Feature();
         List<LngLatAlt> lngLatAlt = new ArrayList<>();
@@ -86,6 +87,23 @@ public class SessionsManagerTest {
     public void shutdown() {
         this.m.shutdown();
         this.m = null;
+    }
+
+    @Test
+    public void keepAliveTest() {
+        Session s = new Session("client", this.ft1);
+        this.m.initializeNewSession(s);
+        FeatureCollection grid = this.m.getEvacuationAnalysisGrid("client");
+        assertThat(grid, notNullValue());
+        try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        FeatureCollection grid2 = this.m.getEvacuationAnalysisGrid("client");
+        assertThat(grid2, nullValue());
+
+
     }
 
     @Test
