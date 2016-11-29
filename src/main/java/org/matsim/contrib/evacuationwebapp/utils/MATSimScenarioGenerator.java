@@ -54,7 +54,6 @@ public class MATSimScenarioGenerator {
         c.controler().setDumpDataAtEnd(false);
         c.controler().setWriteEventsInterval(0);
         c.controler().setWritePlansInterval(0);
-//        c.controler().setWritePlansUntilIteration(20);
 
 
 
@@ -84,7 +83,5 @@ public class MATSimScenarioGenerator {
         c.planCalcScore().setPerforming_utils_hr(0.);
 
 
-//        Scenario sc = ScenarioUtils.createScenario(c);
-//        return sc;
     }
 }

@@ -115,8 +115,7 @@ public class EvacuationNetworkGenerator {
 
         int linkId = 1;
         for (Node node : this.network.getNodes().values()) {
-//			Id nodeId = node.getId();
-            if (this.safeNodes.contains(node)) {// && !nodeId.equals(this.safeNodeAId) && !nodeId.equals(this.safeNodeBId)) {
+            if (this.safeNodes.contains(node)) {
                 linkId++;
                 String sLinkID = "el" + Integer.toString(linkId);
                 Link l2 = this.network.getFactory().createLink(Id.create(sLinkID, Link.class), node, safeNodeA);
@@ -158,44 +157,6 @@ public class EvacuationNetworkGenerator {
                 this.redundantLinks.add(l);
             }
         }
-//		GeometryFactory geofac = new GeometryFactory();
-//		/*
-//		 * classes: 0: default, assume redundant 1: redundant node 2: save
-//		 * nodes, can be reached from evacuation area 3: "normal" nodes within
-//		 * the evacuation area
-//		 */
-//			int inCat = 0;
-//			for (Link l : node.getInLinks().values()) {
-//				LineString ls = geofac.createLineString(new Coordinate[] {MGC.coord2Coordinate(l.getFromNode().getCoord()),MGC.coord2Coordinate(l.getToNode().getCoord())});
-//				if (ls.intersects(this.evacuationArea)) {
-//					if ((inCat == 0) || (inCat == 3)) {
-//						inCat = 3;
-//					} else {
-//						inCat = 2;
-//						break;
-//					}
-//				} else {
-//					this.redundantLinks.add(l);
-//					if (inCat <= 1) {
-//						inCat = 1;
-//					} else {
-//						inCat = 2;
-//						break;
-//					}
-//				}
-//			}
-//			switch (inCat) {
-//			case 2:
-//				this.safeNodes.add(node);
-//				break;
-//			case 3:
-//				break;
-//			case 1:
-//			default:
-//				this.redundantNodes.add(node);
-//			}
-
-
     }
 
     /**

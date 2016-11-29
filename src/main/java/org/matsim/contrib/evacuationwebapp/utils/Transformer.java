@@ -47,7 +47,6 @@ public class Transformer {
         }
     }
 
-
     public LngLatAlt toGeographic(double utmX, double utmY) {
         try {
             Coordinate transformed = JTS.transform(new Coordinate(utmX, utmY), null, this.inverseTransformation);
@@ -90,7 +89,6 @@ public class Transformer {
             throw new RuntimeException(e);
         }
     }
-
 
     public Coord toUTM(LngLatAlt c) {
         try {

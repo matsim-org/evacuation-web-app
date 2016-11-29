@@ -33,11 +33,9 @@ public class TransformerTest {
 
 
     private static final Logger log = Logger.getLogger(Transformer.class);
-
-    private Transformer transformer;
-
     private static final double GEO_EPS = 0.00001;
     private static final double UTM_EPS = 0.001;
+    private Transformer transformer;
 
     @Before
     public void initTransformer() {
@@ -95,17 +93,6 @@ public class TransformerTest {
         double yMax = 4599621.415987491;
         Envelope utm = new Envelope(xMin, xMax, yMin, yMax);
         Envelope geo = this.transformer.toGeographic(utm);
-//        double latMin = 40.726318359376;
-//        double longMin = -74.032402038575;
-//        double latMax = 40.799928255186;
-
-//        double longMax = -73.92796250815;
-
-//        assertThat(geo.getMinX(), is(closeTo(longMin, GEO_EPS)));
-//        assertThat(geo.getMinY(), is(closeTo(latMin, GEO_EPS)));
-//        assertThat(geo.getMaxX(), is(closeTo(longMax, GEO_EPS)));
-//        assertThat(geo.getMaxY(), is(closeTo(latMax, GEO_EPS)));
-
     }
 
     @Test
@@ -164,7 +151,6 @@ public class TransformerTest {
         }
 
     }
-
 
     @Test
     public void toUTMCLngLatAlt() {

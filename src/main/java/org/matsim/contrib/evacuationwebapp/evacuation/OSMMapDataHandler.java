@@ -27,14 +27,12 @@ import org.matsim.core.utils.misc.Counter;
 public class OSMMapDataHandler implements MapDataHandler {
 
 
+    private static final Logger log = Logger.getLogger(OSMMapDataHandler.class);
     private final OSMNetwork network;
     private final OSMWayFilter filter;
     private Counter nodesCounter = new Counter("Nodes downloaded: ");
     private Counter waysCounter = new Counter("Ways downloaded: ");
-
     private long linkId = 0;
-
-    private static final Logger log = Logger.getLogger(OSMMapDataHandler.class);
 
 
     public OSMMapDataHandler(OSMNetwork network, OSMWayFilter filter) {
@@ -51,11 +49,6 @@ public class OSMMapDataHandler implements MapDataHandler {
     @Override
     public void handle(Node node) {
         nodesCounter.incCounter();
-//        LatLon pos = node.getPosition();
-//        Coord c = this.transformer.toUTM(pos);
-////        this.utmEnvelope.expandToInclude(c.getX(), c.getY());
-//        org.matsim.api.core.v01.network.Node n = this.network.getFactory().createNode(Id.createNodeId(node.getId()), c);
-//        this.network.addNode(n);
         network.addNode(node);
 
     }
@@ -70,44 +63,7 @@ public class OSMMapDataHandler implements MapDataHandler {
         network.addWay(way);
 
 
-//        Iterator<Long> nIds = way.getNodeIds().iterator();
-//        boolean oneway = false;//"yes".equals(way.getTags().get("oneway"));
-//
-//        long nId = nIds.next();
-//        Id<org.matsim.api.core.v01.network.Node> currId = Id.createNodeId(nId);
-//
-//        org.matsim.api.core.v01.network.Node curr = this.network.getNodes().get(currId);
-//        if (curr == null) {
-//            log.warn("Way refer to non existing node!");
-//            return;
-//        }
-//        while (nIds.hasNext()) {
-//            nId = nIds.next();
-//            Id<org.matsim.api.core.v01.network.Node> nextId = Id.createNodeId(nId);
-//            org.matsim.api.core.v01.network.Node next = this.network.getNodes().get(nextId);
-//            if (next == null) {
-//                log.warn("Way refer to non existing node!");
-//                return;
-//            }
-//            createLink(curr, next, way);
-//            if (!oneway) {
-//                createLink(next, curr, way);
-//            }
-//            curr = next;
-//
-//        }
-
-
-//        log.info(way);
     }
-
-//    private void createLink(org.matsim.api.core.v01.network.Node curr, org.matsim.api.core.v01.network.Node next, Way way) {
-//        Link l1 = this.network.getFactory().createLink(Id.createLinkId(this.linkId++), curr, next);
-//        l1.setLength(CoordUtils.calcEuclideanDistance(curr.getCoord(), next.getCoord()));
-//        l1.setCapacity(3600);
-//        this.network.addLink(l1);
-//    }
-
 
     @Override
     public void handle(Relation relation) {

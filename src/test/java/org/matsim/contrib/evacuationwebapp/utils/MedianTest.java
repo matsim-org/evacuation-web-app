@@ -58,7 +58,6 @@ public class MedianTest {
 
     }
 
-
     @Test(expected = IndexOutOfBoundsException.class)
     public void testEmptySize() {
         Median m = new Median();

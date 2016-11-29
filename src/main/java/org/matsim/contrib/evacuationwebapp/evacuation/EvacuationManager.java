@@ -62,13 +62,6 @@ public class EvacuationManager {
             return;
         }
 
-
-//        Envelope e = Geometries.getEnvelope(evacuationArea);
-//        String epsg = MGC.getUTMEPSGCodeForWGS84Coordinate(e.getMinX() + e.getWidth() / 2, e.getMinY() + e.getHeight() / 2);
-//        this.transformer = new Transformer(epsg);
-//        Envelope utmE = this.transformer.toUTM(e);
-
-
         int demand = Integer.parseInt((String) session.getArea().getProperties().get("num"));
         double sample = 1;
         if (demand > MAX_DEMAND) {
@@ -76,13 +69,11 @@ public class EvacuationManager {
             demand = MAX_DEMAND;
         }
 
-
         MATSimScenarioGenerator.createScenario(sample, session);
 
         parser.run(this.osmNetwork);
 
         osmNetwork.createMATSimNetwork();
-
 
         this.sl = Id.createLinkId("safe");
         com.vividsolutions.jts.geom.Polygon area = Geometries.toJTS((Polygon) session.getArea().getGeometry());
@@ -96,14 +87,9 @@ public class EvacuationManager {
 
         osmNetwork.consolidate();
 
-//        DummyDemand.createDummyDemand(sc, sl);
-
-
         DefaultDemandGenerator.createDemand(sc, sl, demand);
 
-
         Grid grid = new Grid(session.getUtmE(), utmArea);
-
 
         Controler cntr = new Controler(sc);
         EvacuationTimeObserver obs = new EvacuationTimeObserver(grid, sc, sample);
@@ -156,7 +142,6 @@ public class EvacuationManager {
         isInitialized = true;
 
     }
-
 
     public synchronized FeatureCollection getRoute(LngLatAlt start) {
         init();

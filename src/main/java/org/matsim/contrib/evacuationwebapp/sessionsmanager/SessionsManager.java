@@ -154,8 +154,6 @@ public class SessionsManager {
             this.resp = resp;
             this.latch.countDown();
         }
-
-
     }
 
     private final class Worker implements Runnable {
@@ -185,7 +183,6 @@ public class SessionsManager {
 
             this.em = injector.getInstance(EvacuationManager.class);
 
-//            this.em = new EvacuationManager(area,session);
             isRunning = true;
             while (isRunning(true)) {
                 try {
@@ -217,10 +214,7 @@ public class SessionsManager {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-
             }
-
-
         }
 
         private void cleanUp() {
