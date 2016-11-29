@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.matsim.contrib.evacuationwebapp.evacuation.Session;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlreadyExistsException;
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
+import org.matsim.core.gbl.MatsimRandom;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -43,7 +44,7 @@ public class SessionsManagerTest {
         assertThat(route.getFeatures().size(), is(1));
 
         Double prop = route.getFeatures().get(0).getProperty("time");
-        assertThat(prop, is(40.0001));
+        assertThat(prop, is(34.0001));
     }
 
     private void validateGrid(FeatureCollection grid) throws AssertionError {
@@ -81,6 +82,8 @@ public class SessionsManagerTest {
         GeoJsonObject geo = new Polygon(lngLatAlt);
         ft1.setGeometry(geo);
         ft1.setProperty("num", "500");
+
+        MatsimRandom.reset(4711L);
     }
 
     @After
