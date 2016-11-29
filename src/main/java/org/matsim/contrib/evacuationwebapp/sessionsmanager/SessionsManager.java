@@ -198,12 +198,12 @@ public class SessionsManager {
                             r.setResponse(this.em.getRoute(r.getCoord()));
                             break;
                         case Shutdown:
+                            isRunning(false);
                             while (requesQueue.peek() != null) {
                                 Request rr = requesQueue.poll();
                                 rr.setResponse(null);
                             }
                             r.setResponse(null);
-                            isRunning(false);
                             break;
                         default:
                             throw new RuntimeException("Unknown request type: " + r.getRequestType());
