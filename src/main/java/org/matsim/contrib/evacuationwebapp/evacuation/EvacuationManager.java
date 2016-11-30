@@ -47,7 +47,7 @@ public class EvacuationManager {
     Session session;
     @Inject
     OSMParser parser;
-    private FeatureCollection grid;
+    private FeatureCollection gridColl;
     private LeastCostPathCalculator router;
     //    private Scenario sc;
     private Node safeNode;
@@ -55,6 +55,7 @@ public class EvacuationManager {
     @Inject
     private OSMNetwork osmNetwork;
     private boolean isInitialized = false;
+    private Grid grid;
 
 
     public synchronized void init() {
@@ -89,7 +90,7 @@ public class EvacuationManager {
 
         DefaultDemandGenerator.createDemand(sc, sl, demand);
 
-        Grid grid = new Grid(session.getUtmE(), utmArea);
+        this.grid = new Grid(session.getUtmE(), utmArea);
 
         Controler cntr = new Controler(sc);
 
@@ -111,7 +112,7 @@ public class EvacuationManager {
         this.router = fac.createPathCalculator(sc.getNetwork(), travelCost, cntr.getLinkTravelTimes());
         obs.updateCellColors();
 
-        this.grid = new FeatureCollection();
+        this.gridColl = new FeatureCollection();
         boolean first = true;
         for (Grid.Cell cell : grid.getCells()) {
             if (cell.c == Grid.CellColor.white) {
@@ -140,7 +141,7 @@ public class EvacuationManager {
                 first = false;
             }
 
-            this.grid.add(ret);
+            this.gridColl.add(ret);
         }
 
         isInitialized = true;
@@ -150,6 +151,7 @@ public class EvacuationManager {
     public synchronized FeatureCollection getRoute(LngLatAlt start) {
         init();
         Coord coord = this.session.getTransformer().toUTM(start);
+        Grid.Cell cell = this.grid.getClosestCell(coord.getX(), coord.getY());
         Node from = this.osmNetwork.getClosestNode(coord);
         Person p = this.session.getScenario().getPopulation().getFactory().createPerson(Id.createPersonId(0));
         Vehicle v = VehicleUtils.getFactory().createVehicle(Id.createVehicleId(0), VehicleUtils.getDefaultVehicleType());
@@ -166,7 +168,8 @@ public class EvacuationManager {
                 List<LngLatAlt> trace = this.osmNetwork.traceLink(link.getId());
                 GeoJsonObject geo = new org.geojson.LineString(trace.toArray(new LngLatAlt[0]));
                 ft.setGeometry(geo);
-                ft.setProperty("time", r.travelTime);
+//                ft.setProperty("time", r.travelTime);
+                ft.setProperty("time", cell.time);
                 route.add(ft);
 
             }
@@ -181,7 +184,7 @@ public class EvacuationManager {
 
     public FeatureCollection getGrid() {
         init();
-        return this.grid;
+        return this.gridColl;
     }
 
 
