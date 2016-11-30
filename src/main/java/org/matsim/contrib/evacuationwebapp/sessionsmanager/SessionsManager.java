@@ -24,9 +24,7 @@ import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlr
 import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.*;
 
 /**
@@ -37,13 +35,24 @@ public class SessionsManager {
     private final OSMAPIURLProvider osmURL;
 
     private final Map<String, Worker> workers = new ConcurrentHashMap<>();
-    private final Queue<Thread> threads = new LinkedList<>();
     private final long keepAlive;
 
+    private final BlockingQueue<Worker> removalQueue = new LinkedBlockingQueue<>();
 
     public SessionsManager(OSMAPIURLProvider osmURL, long keepAlive) {
         this.osmURL = osmURL;
         this.keepAlive = keepAlive;
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Worker worker = SessionsManager.this.removalQueue.take();
+                    SessionsManager.this.shutdown(worker);
+                    this.workers.remove(worker.getSessionId());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
         Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
     }
 
@@ -55,7 +64,6 @@ public class SessionsManager {
         w = new Worker(s);
         Thread t = new Thread(w);
         t.start();
-        threads.add(t);
         workers.put(s.getId(), w);
     }
 
@@ -66,7 +74,10 @@ public class SessionsManager {
         }
 
         Request r = new Request(RequestType.Grid);
-        w.addRequest(r);
+        boolean succ = w.addRequest(r);
+        if (!succ) {
+            shutdown(w);
+        }
         return r.getResponse();
     }
 
@@ -77,7 +88,10 @@ public class SessionsManager {
         }
 
         Request r = new Request(RequestType.Route, start);
-        w.addRequest(r);
+        boolean succ = w.addRequest(r);
+        if (!succ) {
+            shutdown(w);
+        }
         return r.getResponse();
     }
 
@@ -87,26 +101,29 @@ public class SessionsManager {
         if (w == null) {
             throw new UnknownSessionException("A session with ID: " + sessionId + " does not exist.");
         }
-        Request r = new Request(RequestType.Shutdown);
-        w.addRequest(r);
-        r.getResponse();
+        shutdown(w);
     }
 
     public void shutdown() {
         Iterator<Map.Entry<String, Worker>> it = this.workers.entrySet().iterator();
         while (it.hasNext()) {
             Request r = new Request(RequestType.Shutdown);
-            it.next().getValue().addRequest(r);
+            Worker w = it.next().getValue();
+            shutdown(w);
             it.remove();
-            r.getResponse();
+
+
         }
-        while (this.threads.peek() != null) {
-            Thread t = this.threads.poll();
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+    }
+
+    public void shutdown(Worker w) {
+        Request r = new Request(RequestType.Shutdown);
+        w.addRequest(r);
+        r.getResponse();
+        try {
+            w.join();
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
         }
     }
 
@@ -162,6 +179,8 @@ public class SessionsManager {
         private final Session session;
         private EvacuationManager em;
         private boolean isRunning = true;
+        private Thread t;
+        private String sessionId;
 
         public Worker(Session session) {
             this.session = session;
@@ -169,6 +188,8 @@ public class SessionsManager {
 
         @Override
         public void run() {
+
+            this.t = Thread.currentThread();
 
             session.prepare();
 
@@ -189,8 +210,8 @@ public class SessionsManager {
                     Request r = requesQueue.poll(SessionsManager.this.keepAlive, TimeUnit.SECONDS);
 
                     if (r == null) {
-                        //TODO remove worker; remove and join thread! [GL Nov '16]
                         cleanUp();
+                        SessionsManager.this.removalQueue.add(this);
                         continue;
                     }
 
@@ -215,6 +236,7 @@ public class SessionsManager {
                     throw new RuntimeException(e);
                 }
             }
+
         }
 
         private void cleanUp() {
@@ -223,6 +245,7 @@ public class SessionsManager {
                 Request rr = requesQueue.poll();
                 rr.setResponse(null);
             }
+
         }
 
         private synchronized boolean isRunning(boolean keepRunning) {
@@ -232,12 +255,24 @@ public class SessionsManager {
             return isRunning;
         }
 
-        void addRequest(Request r) {
+        boolean addRequest(Request r) {
             if (isRunning(true)) {
                 requesQueue.add(r);
+                return true;
             } else {
                 r.setResponse(null);
+                return false;
             }
         }
+
+        public void join() throws InterruptedException {
+            this.t.join();
+        }
+
+        public String getSessionId() {
+            return sessionId;
+        }
     }
+
+
 }
