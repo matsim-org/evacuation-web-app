@@ -30,7 +30,7 @@ public class MATSimScenarioGenerator {
         c.global().setNumberOfThreads(6);
 
         c.controler().setCreateGraphs(false);
-        c.controler().setLastIteration(20);
+        c.controler().setLastIteration(75);
         c.controler().setOutputDirectory("/tmp/output/" + session.getId());
         c.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
@@ -41,15 +41,15 @@ public class MATSimScenarioGenerator {
         c.qsim().setNumberOfThreads(6);
 
         c.strategy().setMaxAgentPlanMemorySize(3);
-        c.strategy().addParam("ModuleDisableAfterIteration_1", "15");
-        c.strategy().addParam("maxAgentPlanMemorySize", "3");
+        c.strategy().addParam("ModuleDisableAfterIteration_1", "30");
         c.strategy().addParam("Module_1", "ReRoute");
         c.strategy().addParam("ModuleProbability_1", "0.1");
         c.strategy().addParam("Module_2", "ChangeExpBeta");
         c.strategy().addParam("ModuleProbability_2", "0.9");
 
         c.travelTimeCalculator().setTravelTimeCalculatorType("TravelTimeCalculatorHashMap");
-        c.travelTimeCalculator().setTravelTimeAggregatorType("experimental_LastMile");
+//        c.travelTimeCalculator().setTravelTimeAggregatorType("experimental_LastMile");
+        c.travelTimeCalculator().setTraveltimeBinSize(300);
 
         c.controler().setDumpDataAtEnd(false);
         c.controler().setWriteEventsInterval(0);
