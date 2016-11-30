@@ -44,7 +44,7 @@ public class SessionsManagerTest {
         assertThat(route.getFeatures().size(), is(1));
 
         Double prop = route.getFeatures().get(0).getProperty("time");
-        assertThat(prop, is(34.0001));
+        assertThat(prop, is(28.));
     }
 
     private void validateGrid(FeatureCollection grid) throws AssertionError {
@@ -70,7 +70,7 @@ public class SessionsManagerTest {
 
     @Before
     public void intialize() {
-        this.m = new SessionsManager(() -> "http://localhost:9090/api/", 5);
+        this.m = new SessionsManager(() -> "http://localhost:9090/api/", 10);
 
         this.ft1 = new Feature();
         List<LngLatAlt> lngLatAlt = new ArrayList<>();
@@ -99,7 +99,7 @@ public class SessionsManagerTest {
         FeatureCollection grid = this.m.getEvacuationAnalysisGrid("client");
         assertThat(grid, notNullValue());
         try {
-            Thread.sleep(6000);
+            Thread.sleep(10001);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
