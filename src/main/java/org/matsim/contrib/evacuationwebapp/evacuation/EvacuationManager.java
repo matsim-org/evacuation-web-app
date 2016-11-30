@@ -92,8 +92,12 @@ public class EvacuationManager {
         Grid grid = new Grid(session.getUtmE(), utmArea);
 
         Controler cntr = new Controler(sc);
+
         EvacuationTimeObserver obs = new EvacuationTimeObserver(grid, sc, sample);
-        cntr.getEvents().addHandler(obs);
+//        cntr.getEvents().addHandler(obs);
+        ObserverController obsCntr = new ObserverController(obs);
+        cntr.addControlerListener(obsCntr);
+
 
 //        Level level = Logger.getRootLogger().getLevel();
         Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
