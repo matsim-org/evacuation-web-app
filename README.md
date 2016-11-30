@@ -25,7 +25,7 @@ The `-Xmx8G` option makes sure that the Java VM has at most 8 Gigabytes of RAM a
 This is sufficient for running small and medium size szenarios (e.g. a town or a smaller district of a city).
 If you intend to run large scenarios you have to adapt the `-Xmx` option accordingly.
 After the backend is up and running open the web browser of your choice and enter http://localhost:8080.
-This will show you the frontend with more instructions on how to define the scenario and run the simulation.
+
 
 #Running test cases
 Test cases relay on a local overpass server listening on port 9090. If you have docker you can start it by invoking
