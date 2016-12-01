@@ -435,8 +435,9 @@
 
             var coords = route.features[0].geometry.coordinates[0];
             var latLng = new L.LatLng(coords[1], coords[0]);
-            startMarker.setLatLng(latLng);
-
+//            startMarker.setLatLng(latLng);
+            startMarker = L.marker(latLng).addTo(routeLayer);
+            startMarker.bindTooltip("Depart now ...", {permanent: true, offset: [0, 0]});
             routeFeature = L.geoJson(route, {
                 style: styleRoute
             }).addTo(routeLayer);
@@ -533,8 +534,6 @@
                 routeLayer.removeLayer(startMarker);
                 routeLayer.removeLayer(routeFeature);
                 routeLayer.removeLayer(stopMarker);
-                startMarker = L.marker(e.latlng).addTo(routeLayer);
-                startMarker.bindTooltip("Depart now ...", {permanent: true, offset: [0, 0]});
                 var geojsonFeature = {
                     "type": "Feature",
                     "properties": {
