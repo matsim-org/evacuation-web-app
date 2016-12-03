@@ -9,18 +9,13 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions;
+package org.matsim.contrib.evacuationwebapp.model;
 
 /**
- * Created by laemmel on 17/11/2016.
+ * Created by laemmel on 20/11/2016.
  */
-public class UnknownSessionException extends RuntimeException {
+@FunctionalInterface
+public interface OSMAPIURLProvider {
 
-    public UnknownSessionException() {
-        super();
-    }
-
-    public UnknownSessionException(String msg) {
-        super(msg);
-    }
+    public String getOSMAPIURL();
 }

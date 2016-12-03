@@ -9,7 +9,7 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.evacuation;
+package org.matsim.contrib.evacuationwebapp.model;
 
 import com.google.inject.Inject;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -42,7 +42,8 @@ public class EvacuationManager {
 
     private static final Logger log = Logger.getLogger(EvacuationManager.class);
 
-    private static final int MAX_DEMAND = 25000;
+    private static final int MAX_np_DEMAND = 25000;
+    private static final int MAX_100p_DEMAND = 5000;
     @Inject
     Session session;
     @Inject
@@ -65,9 +66,12 @@ public class EvacuationManager {
 
         int demand = Integer.parseInt((String) session.getArea().getProperties().get("num"));
         double sample = 1;
-        if (demand > MAX_DEMAND) {
-            sample = (double) MAX_DEMAND / demand;
-            demand = MAX_DEMAND;
+        if (demand > MAX_np_DEMAND) {
+            sample = (double) MAX_np_DEMAND / demand;
+            demand = MAX_np_DEMAND;
+        } else if (demand > MAX_100p_DEMAND) {
+            sample = 0.1;
+            demand = (int) (demand * sample);
         }
 
         MATSimScenarioGenerator.createScenario(sample, session);

@@ -9,15 +9,15 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.sessionsmanager;
+package org.matsim.contrib.evacuationwebapp.controller.sessions;
 
 import org.geojson.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.matsim.contrib.evacuationwebapp.evacuation.Session;
-import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlreadyExistsException;
-import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
+import org.matsim.contrib.evacuationwebapp.controller.sessions.exceptions.SessionAlreadyExistsException;
+import org.matsim.contrib.evacuationwebapp.controller.sessions.exceptions.UnknownSessionException;
+import org.matsim.contrib.evacuationwebapp.model.Session;
 import org.matsim.core.gbl.MatsimRandom;
 
 import java.util.ArrayList;
@@ -28,7 +28,6 @@ import java.util.Queue;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.nullValue;
 
 /**
  * Created by laemmel on 17/11/2016.
@@ -70,7 +69,7 @@ public class SessionsManagerTest {
 
     @Before
     public void intialize() {
-        this.m = new SessionsManager(() -> "http://localhost:9090/api/", 10);
+        this.m = new SessionsManager(() -> "http://localhost:9080/api/", 10);
 
         this.ft1 = new Feature();
         List<LngLatAlt> lngLatAlt = new ArrayList<>();
@@ -99,12 +98,17 @@ public class SessionsManagerTest {
         FeatureCollection grid = this.m.getEvacuationAnalysisGrid("client");
         assertThat(grid, notNullValue());
         try {
-            Thread.sleep(10001);
+            Thread.sleep(11000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        FeatureCollection grid2 = this.m.getEvacuationAnalysisGrid("client");
-        assertThat(grid2, nullValue());
+
+        try {
+            FeatureCollection grid2 = this.m.getEvacuationAnalysisGrid("client");
+        } catch (UnknownSessionException e) {
+            //do nothing!
+
+        }
 
 
     }
@@ -143,19 +147,17 @@ public class SessionsManagerTest {
         this.m.initializeNewSession(s2);
     }
 
+
+    //INTEGRATION TESTS
     @Test(timeout = 120 * 1000) //timeout 120s
     public void runSeveralSessions() {
         for (int i = 0; i < 4; i++) {
             Session s = new Session("client" + i, this.ft1);
             this.m.initializeNewSession(s);
-        }
-
-        for (int i = 0; i < 4; i++) {
             FeatureCollection grid = this.m.getEvacuationAnalysisGrid("client" + i);
             assertThat(grid, notNullValue());
         }
         this.m.disconnect("client0");
-
         for (int i = 1; i < 4; i++) {
             LngLatAlt ll = new LngLatAlt(-74.03363892451813, 40.753928071164495);
             FeatureCollection route = this.m.getEvacuationRoute("client" + i, ll);
@@ -167,6 +169,8 @@ public class SessionsManagerTest {
         }
     }
 
+
+    //VALIDATION TESTS
     @Test(timeout = 60 * 1000) //timeout 60s
     public void runParallelQueries() {
         Session s = new Session("client", this.ft1);

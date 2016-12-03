@@ -9,20 +9,18 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.evacuation;
-
-import de.westnordost.osmapi.map.data.Way;
-import org.matsim.api.core.v01.network.Link;
+package org.matsim.contrib.evacuationwebapp.controller.sessions.exceptions;
 
 /**
- * Created by laemmel on 06/11/2016.
+ * Created by laemmel on 17/11/2016.
  */
-public interface OSMWayFilter {
+public class UnknownSessionException extends RuntimeException {
 
-    boolean rejectWay(Way way);
+    public UnknownSessionException() {
+        super();
+    }
 
-    void configureLink(Way way, Link link);
-
-    boolean isOneway(Way way);
-
+    public UnknownSessionException(String msg) {
+        super(msg);
+    }
 }

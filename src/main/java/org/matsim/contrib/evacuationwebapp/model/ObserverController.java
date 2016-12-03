@@ -9,7 +9,7 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.evacuation;
+package org.matsim.contrib.evacuationwebapp.model;
 
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.IterationStartsListener;

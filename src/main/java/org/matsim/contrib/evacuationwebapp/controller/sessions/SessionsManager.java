@@ -9,7 +9,7 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.sessionsmanager;
+package org.matsim.contrib.evacuationwebapp.controller.sessions;
 
 
 import com.google.inject.AbstractModule;
@@ -19,9 +19,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.geojson.FeatureCollection;
 import org.geojson.LngLatAlt;
-import org.matsim.contrib.evacuationwebapp.evacuation.*;
-import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlreadyExistsException;
-import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
+import org.matsim.contrib.evacuationwebapp.controller.sessions.exceptions.SessionAlreadyExistsException;
+import org.matsim.contrib.evacuationwebapp.controller.sessions.exceptions.UnknownSessionException;
+import org.matsim.contrib.evacuationwebapp.model.*;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -180,7 +180,6 @@ public class SessionsManager {
         private EvacuationManager em;
         private boolean isRunning = true;
         private Thread t;
-        private String sessionId;
 
         public Worker(Session session) {
             this.session = session;
@@ -270,7 +269,7 @@ public class SessionsManager {
         }
 
         public String getSessionId() {
-            return sessionId;
+            return this.session.getId();
         }
     }
 

@@ -8,7 +8,7 @@
  *
  * See also LICENSE and WARRANTY file
  */
-package org.matsim.contrib.evacuationwebapp.evacuation;
+package org.matsim.contrib.evacuationwebapp.model;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;

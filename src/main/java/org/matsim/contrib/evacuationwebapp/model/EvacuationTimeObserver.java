@@ -9,7 +9,7 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.evacuation;
+package org.matsim.contrib.evacuationwebapp.model;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;

@@ -9,7 +9,7 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.evacuation;
+package org.matsim.contrib.evacuationwebapp.model;
 
 import de.westnordost.osmapi.map.data.Way;
 import org.apache.log4j.Logger;
@@ -29,21 +29,21 @@ public class OSMVehicularFilter implements OSMWayFilter {
 
 
     public OSMVehicularFilter() {
-        highwaysettingMap.put("motorway", new Highwaysetting(2, 120 / 3.6, 2000, true));
-        highwaysettingMap.put("motorway_link", new Highwaysetting(1, 80 / 3.6, 1500, true));
-        highwaysettingMap.put("trunk", new Highwaysetting(1, 80 / 3.6, 2000, false));
-        highwaysettingMap.put("trunk_link", new Highwaysetting(1, 50 / 3.6, 1500, false));
-        highwaysettingMap.put("primary", new Highwaysetting(1, 80 / 3.6, 1500, false));
-        highwaysettingMap.put("primary_link", new Highwaysetting(1, 60 / 3.6, 1500, false));
-        highwaysettingMap.put("secondary", new Highwaysetting(1, 30 / 3.6, 1000, false));
-        highwaysettingMap.put("secondary_link", new Highwaysetting(1, 30 / 3.6, 1000, false));
-        highwaysettingMap.put("tertiary", new Highwaysetting(1, 25 / 3.6, 600, false));
-        highwaysettingMap.put("tertiary_link", new Highwaysetting(1, 25 / 3.6, 600, false));
-        highwaysettingMap.put("minor", new Highwaysetting(1, 20 / 3.6, 600, false));
-        highwaysettingMap.put("residential", new Highwaysetting(1, 15 / 3.6, 600, false));
-        highwaysettingMap.put("living_street", new Highwaysetting(1, 15 / 3.6, 600, false));
-        highwaysettingMap.put("service", new Highwaysetting(1, 15 / 3.6, 300, false));
-        highwaysettingMap.put("unclassified", new Highwaysetting(1, 45 / 3.6, 600, false));
+        highwaysettingMap.put("motorway", new Highwaysetting(1, 2, 120 / 3.6, 2000, true));
+        highwaysettingMap.put("motorway_link", new Highwaysetting(1, 1, 80 / 3.6, 1500, true));
+        highwaysettingMap.put("trunk", new Highwaysetting(1, 1, 80 / 3.6, 2000, false));
+        highwaysettingMap.put("trunk_link", new Highwaysetting(1, 1, 50 / 3.6, 1500, false));
+        highwaysettingMap.put("primary", new Highwaysetting(1, 1, 80 / 3.6, 1500, false));
+        highwaysettingMap.put("primary_link", new Highwaysetting(1, 1, 60 / 3.6, 1500, false));
+        highwaysettingMap.put("secondary", new Highwaysetting(2, 1, 30 / 3.6, 1000, false));
+        highwaysettingMap.put("secondary_link", new Highwaysetting(2, 1, 30 / 3.6, 1000, false));
+        highwaysettingMap.put("tertiary", new Highwaysetting(3, 1, 25 / 3.6, 600, false));
+        highwaysettingMap.put("tertiary_link", new Highwaysetting(3, 1, 25 / 3.6, 600, false));
+        highwaysettingMap.put("minor", new Highwaysetting(4, 1, 20 / 3.6, 600, false));
+        highwaysettingMap.put("residential", new Highwaysetting(4, 1, 15 / 3.6, 600, false));
+        highwaysettingMap.put("living_street", new Highwaysetting(5, 1, 15 / 3.6, 600, false));
+        highwaysettingMap.put("service", new Highwaysetting(5, 1, 15 / 3.6, 300, false));
+        highwaysettingMap.put("unclassified", new Highwaysetting(5, 1, 45 / 3.6, 600, false));
 
     }
 
@@ -57,8 +57,17 @@ public class OSMVehicularFilter implements OSMWayFilter {
         if (way.getNodeIds().size() <= 1) {
             return true;
         }
+        Highwaysetting setting = highwaysettingMap.get(way.getTags().get("highway"));
 
-        return !highwaysettingMap.containsKey(way.getTags().get("highway"));
+        if (setting == null) {
+            return true;
+        }
+
+//        if (setting.cat >=3) {
+//            return true;
+//        }
+
+        return false;
     }
 
     @Override
@@ -97,12 +106,14 @@ public class OSMVehicularFilter implements OSMWayFilter {
         private final double freespeed;
         private final double flowCap_vehPerHour;
         private final boolean oneWay;
+        private final int cat;
 
-        public Highwaysetting(int lanes, double freespeed, double flowCap_vehPerHour, boolean oneWay) {
+        public Highwaysetting(int cat, int lanes, double freespeed, double flowCap_vehPerHour, boolean oneWay) {
             this.lanes = lanes;
             this.freespeed = freespeed;
             this.flowCap_vehPerHour = flowCap_vehPerHour;
             this.oneWay = oneWay;
+            this.cat = cat;
         }
 
     }

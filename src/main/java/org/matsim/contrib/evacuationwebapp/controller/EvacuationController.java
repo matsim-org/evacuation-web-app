@@ -16,10 +16,10 @@ import org.apache.log4j.Logger;
 import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.Point;
-import org.matsim.contrib.evacuationwebapp.evacuation.Session;
-import org.matsim.contrib.evacuationwebapp.sessionsmanager.SessionsManager;
-import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.SessionAlreadyExistsException;
-import org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions.UnknownSessionException;
+import org.matsim.contrib.evacuationwebapp.controller.sessions.SessionsManager;
+import org.matsim.contrib.evacuationwebapp.controller.sessions.exceptions.SessionAlreadyExistsException;
+import org.matsim.contrib.evacuationwebapp.controller.sessions.exceptions.UnknownSessionException;
+import org.matsim.contrib.evacuationwebapp.model.Session;
 import org.matsim.contrib.evacuationwebapp.utils.SessionIDGenerator;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -37,12 +37,13 @@ public class EvacuationController {
 
 
     private static final Logger log = Logger.getLogger(EvacuationController.class);
-    private final SessionsManager sm = new SessionsManager(() -> "http://overpass-api.de/api/", 365 * 24 * 3600);
+    //    private final SessionsManager sm = new SessionsManager(() -> "http://overpass-api.de/api/", 365 * 24 * 3600);
+    private final SessionsManager sm = new SessionsManager(() -> "http://localhost:9090/api/", 365 * 24 * 3600);
     private long sessions = 0;
 
     @MessageMapping("/evac")
     @SendToUser("/topic/evacuation")
-    public FeatureCollection evacuationArea(@RequestBody Feature[] message) throws Exception {
+    public FeatureCollection evacuationAreaGrid(@RequestBody Feature[] message) throws Exception {
 
         String id = message[0].getProperty("sessionid");
         Session s = new Session(id, message[0]);

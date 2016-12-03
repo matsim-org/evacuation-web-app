@@ -12,7 +12,7 @@
 package org.matsim.contrib.evacuationwebapp.utils;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.evacuationwebapp.evacuation.Session;
+import org.matsim.contrib.evacuationwebapp.model.Session;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;

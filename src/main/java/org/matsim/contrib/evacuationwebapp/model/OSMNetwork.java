@@ -9,7 +9,7 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.evacuation;
+package org.matsim.contrib.evacuationwebapp.model;
 
 import com.google.inject.Inject;
 import com.vividsolutions.jts.geom.Envelope;
@@ -37,13 +37,8 @@ public class OSMNetwork {
     private static final Logger log = Logger.getLogger(OSMNetwork.class);
     private final QuadTree<org.matsim.api.core.v01.network.Node[]> quad;
     private final Scenario sc;
-
-
-    private long linkIds = 0;
-
     private final Map<Id<Link>, LinkInfo> tracerLinks = new HashMap<>();
-
-
+    private long linkIds = 0;
     private Session session;
 
     @Inject
@@ -216,14 +211,14 @@ public class OSMNetwork {
 
     }
 
+    public List<LngLatAlt> traceLink(Id<Link> id) {
+        return this.tracerLinks.get(id).coords;
+    }
+
     private static class NodeInfo {
         Node node;
         org.matsim.api.core.v01.network.Node matNode = null;
         int links;
-    }
-
-    public List<LngLatAlt> traceLink(Id<Link> id) {
-        return this.tracerLinks.get(id).coords;
     }
 
     private static final class LinkInfo {

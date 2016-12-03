@@ -9,7 +9,7 @@
  * See also LICENSE and WARRANTY file
  */
 
-package org.matsim.contrib.evacuationwebapp.sessionsmanager.exceptions;
+package org.matsim.contrib.evacuationwebapp.controller.sessions.exceptions;
 
 
 /**
