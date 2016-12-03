@@ -69,7 +69,7 @@ public class SessionsManagerTest {
 
     @Before
     public void intialize() {
-        this.m = new SessionsManager(() -> "http://localhost:9080/api/", 10);
+        this.m = new SessionsManager(() -> "http://localhost:9090/api/", 10);
 
         this.ft1 = new Feature();
         List<LngLatAlt> lngLatAlt = new ArrayList<>();
