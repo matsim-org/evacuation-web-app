@@ -43,7 +43,7 @@ public class EvacuationManager {
     private static final Logger log = Logger.getLogger(EvacuationManager.class);
 
     private static final int MAX_np_DEMAND = 25000;
-    private static final int MAX_100p_DEMAND = 5000;
+    private static final int MAX_100p_DEMAND = 1000;
     @Inject
     Session session;
     @Inject
@@ -70,8 +70,8 @@ public class EvacuationManager {
             sample = (double) MAX_np_DEMAND / demand;
             demand = MAX_np_DEMAND;
         } else if (demand > MAX_100p_DEMAND) {
-            sample = 0.1;
-            demand = (int) (demand * sample);
+            sample = (double) MAX_100p_DEMAND / demand;
+            demand = MAX_100p_DEMAND;
         }
 
         MATSimScenarioGenerator.createScenario(sample, session);
