@@ -374,7 +374,9 @@
                     if (greeting != null) {
                         showGrid(JSON.parse(greeting.body));
                     } else {
+                        //TODO make controller return null instead of empty FeatureCollection
                         alert("Could not run evacuation simulation, please select smaller area and try again!");
+                        location.reload(true);
                     }
                 });
                 stompClient.subscribe('/user/topic/routing', function (route) {
@@ -555,7 +557,7 @@
                 return this._div;
             };
             info.update = function (time) {
-                this._div.innerHTML = '<h4>Average evacuation time per cell</h4>' + (time ?
+                this._div.innerHTML = '<h4>Expected evacuation time per cell</h4>' + (time ?
                         '<b>' + toHHMMSS(time) + ' [HH:MM:SS]</b>'
                                 : 'Hover over a cell');
             };
