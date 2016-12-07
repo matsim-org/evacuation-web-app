@@ -431,6 +431,7 @@
         coords[0].properties["num"] = $("#number").val();
         stompClient.send("/app/evac", {}, JSON.stringify(coords));
         setSubmitted(true);
+        draw.remove();
     }
 
     function showRoute(route) {
