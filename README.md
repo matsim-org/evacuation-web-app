@@ -26,6 +26,17 @@ This is sufficient for running small and medium size szenarios (e.g. a town or a
 If you intend to run large scenarios you have to adapt the `-Xmx` option accordingly.
 After the backend is up and running open the web browser of your choice and enter http://localhost:8080.
 
+#Usage
+1. Zoom and pan to the desired location.
+2. Select the evacuation area using the polygon tool (button on the top left)
+3. Once evacuation area is selected, press connect.
+4. Enter the number of evacuees.
+5. Press submit.
+6. After a while the evacuation analysis results will be shown.
+7. You may no click anywhere inside the evacuation area to get a suggested evacuation route.
+
+#Demo instance
+A demo instance is running on [http://cacrowd.org](cacrow.org)
 
 #Running test cases
 Test cases relay on a local overpass server listening on port 9090. If you have docker you can start it by invoking
