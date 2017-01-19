@@ -36,7 +36,7 @@ After the backend is up and running open the web browser of your choice and ente
 7. You may no click anywhere inside the evacuation area to get a suggested evacuation route.
 
 #Demo instance
-A demo instance is running on [http://cacrowd.org](http://cacrow.org)
+A demo instance is running on [http://cacrowd.org](http://cacrowd.org)
 
 #Running test cases
 Test cases relay on a local overpass server listening on port 9090. If you have docker you can start it by invoking
