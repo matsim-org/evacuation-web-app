@@ -37,7 +37,7 @@ public class EvacuationController {
 
 
     private static final Logger log = Logger.getLogger(EvacuationController.class);
-    private final SessionsManager sm = new SessionsManager(() -> "http://overpass-api.de/api/", 365 * 24 * 3600);
+    private final SessionsManager sm = new SessionsManager(() -> "http://overpass-api.de/api/", 1800);
     //    private final SessionsManager sm = new SessionsManager(() -> "http://localhost:9080/api/", 365 * 24 * 3600);
     private long sessions = 0;
 
