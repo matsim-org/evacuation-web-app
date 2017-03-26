@@ -4,17 +4,17 @@ This web application let you run evacuation simulations from your web browser.
 While the evacuation scenario is defined on an interactive map in your web browser (frontend), 
 the actual simulation run's on a (local instantiated) server (backend).
 
-#Prerequisites
+# Prerequisites
 
 Java >= 1.8; 
 Maven; 
 A firewall configuration that let you open server port 8080 (for local connections)
 
-#Installation
+# Installation
 
     git clone https://github.com/matsim-org/evacuation-web-app.git
 
-#Bild and run
+# Bild and run
 
     cd evacuation-web-app
     mvn clean package
@@ -26,7 +26,8 @@ This is sufficient for running small and medium size szenarios (e.g. a town or a
 If you intend to run large scenarios you have to adapt the `-Xmx` option accordingly.
 After the backend is up and running open the web browser of your choice and enter http://localhost:8080.
 
-#Usage
+# Usage
+
 1. Zoom and pan to the desired location.
 2. Select the evacuation area using the polygon tool (button on the top left)
 3. Once evacuation area is selected, press connect.
@@ -35,15 +36,15 @@ After the backend is up and running open the web browser of your choice and ente
 6. After a while the evacuation analysis results will be shown.
 7. You may no click anywhere inside the evacuation area to get a suggested evacuation route.
 
-#Demo instance
+# Demo instance
 A demo instance is running on [http://cacrowd.org](http://cacrowd.org)
 
-#Running test cases
+# Running test cases
 Test cases relay on a local overpass server listening on port 9090. If you have docker you can start it by invoking
   
     docker pull grgrlmml/overpass-api-4-tests
     docker run -d -p 9090:9090 grgrlmml/overpass-api-4-tests
 
-#How to contribute
-If you found bugs or if you want to contribute to this project please feel free to contact us via github.
+# How to contribute
+If you find bugs or if you want to contribute to this project please feel free to contact us via github.
 
