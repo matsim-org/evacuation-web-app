@@ -13,7 +13,6 @@ package org.matsim.contrib.evacuationwebapp.model;
 
 import com.google.inject.Inject;
 import com.vividsolutions.jts.geom.Coordinate;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.geojson.*;
 import org.matsim.api.core.v01.Coord;
@@ -105,15 +104,14 @@ public class EvacuationManager {
 
 
 //        Level level = Logger.getRootLogger().getLevel();
-        Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
+//        Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
         cntr.run();
 //        Logger.getRootLogger().setLevel(level);//restore log level
 
         LeastCostPathCalculatorFactory fac = cntr.getLeastCostPathCalculatorFactory();
-
         TravelDisutility travelCost = cntr.getTravelDisutilityFactory().createTravelDisutility(cntr.getLinkTravelTimes());
-
         this.router = fac.createPathCalculator(sc.getNetwork(), travelCost, cntr.getLinkTravelTimes());
+
         obs.updateCellColors();
 
         this.gridColl = new FeatureCollection();

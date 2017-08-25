@@ -15,8 +15,6 @@ package org.matsim.contrib.evacuationwebapp.controller.sessions;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.geojson.FeatureCollection;
 import org.geojson.LngLatAlt;
 import org.matsim.contrib.evacuationwebapp.controller.sessions.exceptions.SessionAlreadyExistsException;
@@ -53,7 +51,7 @@ public class SessionsManager {
                 }
             }
         }).start();
-        Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
+//        Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
     }
 
     public void initializeNewSession(Session s) throws SessionAlreadyExistsException {

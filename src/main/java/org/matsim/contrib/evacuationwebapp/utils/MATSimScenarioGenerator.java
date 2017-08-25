@@ -30,7 +30,7 @@ public class MATSimScenarioGenerator {
         c.global().setNumberOfThreads(6);
 
         c.controler().setCreateGraphs(false);
-        c.controler().setLastIteration(0);
+        c.controler().setLastIteration(50);
         c.controler().setOutputDirectory("/tmp/output/" + session.getId());
         c.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
