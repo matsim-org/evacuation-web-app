@@ -13,6 +13,7 @@ package org.matsim.contrib.evacuationwebapp.model;
 
 import com.google.inject.Inject;
 import com.vividsolutions.jts.geom.Coordinate;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.geojson.*;
 import org.matsim.api.core.v01.Coord;
@@ -103,8 +104,8 @@ public class EvacuationManager {
         cntr.addControlerListener(obsCntr);
 
 
-//        Level level = Logger.getRootLogger().getLevel();
-//        Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
+        Level level = Logger.getRootLogger().getLevel();
+        Logger.getRootLogger().setLevel(Level.WARN);//Make output less verbose
         cntr.run();
 //        Logger.getRootLogger().setLevel(level);//restore log level
 
