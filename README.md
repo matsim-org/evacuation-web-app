@@ -26,6 +26,16 @@ This is sufficient for running small and medium size szenarios (e.g. a town or a
 If you intend to run large scenarios you have to adapt the `-Xmx` option accordingly.
 After the backend is up and running open the web browser of your choice and enter http://localhost:8080.
 
+# Run in Docker
+
+To start the application in Docker enter
+
+    docker run -p 8080:8080 grgrlmml/evacuation-web-app
+    
+To receive the latest updates of the application enter
+    
+    docker pull grgrlmml/evacuation-web-app
+
 # Usage
 
 1. Zoom and pan to the desired location.
@@ -46,5 +56,5 @@ Test cases relay on a local overpass server listening on port 9090. If you have 
     docker run -d -p 9090:9090 grgrlmml/overpass-api-4-tests
 
 # How to contribute
-If you find bugs or if you want to contribute to this project please feel free to contact us via github.
+If you find bugs or if you want to contribute to this project please feel free to contact us via github or via email (info@cacrowd.org)
 
