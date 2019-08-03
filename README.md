@@ -56,5 +56,4 @@ Test cases relay on a local overpass server listening on port 9090. If you have 
     docker run -d -p 9090:9090 grgrlmml/overpass-api-4-tests
 
 # How to contribute
-If you find bugs or if you want to contribute to this project please feel free to contact us via github or via email (info@cacrowd.org)
-
+If you find bugs or if you want to contribute to this project please feel free to contact us via github
